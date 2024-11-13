@@ -1,0 +1,41 @@
+---
+title: "AssignmentI"
+author: "Silpa Soni Nallacheruvu (19980824-5287) Hernan Aldana (20000526-4999)"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Summary
+
+# Exercise 1:1
+
+## Approach : 
+
+## Code :
+
+```{r echo=FALSE}
+
+```
+
+## Output : 
+
+## Observation : 
+
+# Exercise 1:2
+
+## Approach : 
+
+## Code :
+
+```{r echo=FALSE}
+
+```
+
+## Output : 
+
+## Observation : 
+
