@@ -13,7 +13,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Exercise 1:1
 
-## Exercise1 : 
+## Question 1: 
 
 Percentage in Favor and Against Legal Abortion by Gender :
 
@@ -74,7 +74,7 @@ compared to men (53.2%). Similarly, a larger percentage of men (46.8%)
 are against legal abortion compared to women (38.2%).
 
 
-## Exercise2 : 
+## Question 2: 
 
 ### Approach : 
 
@@ -172,7 +172,7 @@ much lesser than 0.05. Hence, we reject the null hypothesis ${H_0}$, which
 indicates that there is a significant difference in opinions on legal abortion 
 between men and women.
 
-## Exercise3 : 
+## Question 3: 
 
 The odds ratio (OR) is a measure used to quantify the strength of association 
 between two categorical variables. For the given 2×2 table regarding opinions 
@@ -262,7 +262,7 @@ The estimated odds ratio indicates that the women are significantly more likely
 to support legal abortion compared to men and the 95% confidence interval of 
 the odds ratio support that indication. 
 
-## Exercise4 : 
+## Question 4: 
 
 The risk ratio (also called relative risk, RR) quantifies the likelihood of an 
 event occurring in one group relative to another group. For the given 2×2 table
@@ -355,7 +355,7 @@ especially when the event probability is high (e.g., large proportions of people
 The risk ratio provides a more intuitive interpretation as it measures the relative likelihood.
 
 
-## Exercise5 : 
+## Question 5: 
 
 ### Approach : 
 
@@ -412,15 +412,69 @@ oddsratio(tab1, method = "wald", rev="both")
 
 # Exercise 1:2
 
-## Approach : 
+## Question 1:
 
-## Code :
+### Approach : 
+
+We will analyze the provided 2x2 table of admissions and gender. First we will perform a chi-squared test to determine independence. Second, we will calculate the likelihood ratio statistic. Thrid, estimate the Odds Ratio (OR) and its 95% confidence interval. Finally, we will estimate the Risk Ratio (RR) and its 95% confidence interval.
+
+### Code :
 
 ```{r echo=FALSE}
-
+# Step 1: Create the 2x2 table
+admission_table <- as.table(rbind(c(1198, 1493), c(557, 1278)))
+dimnames(admission_table) <- list(
+  Gender = c("Men", "Women"),
+  Admission = c("Admitted", "Not Admitted")
+)
 ```
 
-## Output : 
+```{r echo=FALSE}
+# Step 2: Perform Chi-Square Test
+chisq_test_result <- chisq.test(admission_table, correct = FALSE)
+```
 
-## Observation : 
+```{r echo=FALSE}
+# Step 3: Perform Likelihood Ratio Test (G^2)
+library(MASS)
+loglm_result <- loglm(~ Gender + Admission, admission_table)
+```
+
+```{r echo=FALSE}
+# Step 4: Calculate Odds Ratio
+library(epitools)
+odds_ratio_result <- oddsratio(admission_table, method = "wald", rev = "neither")
+```
+
+```{r echo=FALSE}
+# Step 5: Calculate Risk Ratio
+risk_ratio_result <- riskratio(admission_table, rev = "neither")
+
+# Display the results
+list(
+  Chi_Square_Test = chisq_test_result,
+  Likelihood_Ratio_Test = loglm_result,
+  Odds_Ratio = odds_ratio_result,
+  Risk_Ratio = risk_ratio_result
+)
+```
+
+### Output : 
+
+#### Chi-Square Test :
+$ \text{Pearson's Chi-Square Statistic}:\ X^2 = 92.205 $ 
+$ \text{Degrees of freedom}: df = 1 $
+$ \text{p-value} < 2.2 \times 10^{-16} $
+
+As it's a 2x2 table the degrees of freedom are calculated as $(\text{rows}-1)(\text{columns-1})$
+On the other hand the p-value is extremely small, which indicates that the null hypothesis of independence between gender and admission status is rejected.
+
+#### Likelihood Ratio Test :
+$G^2 = 93.4494$ 
+$df = 1$
+$p\text{-value} = 0$
+
+$G^2 = 2 \sum O_{ij} \ln \left(\frac{O_{ij}}{E_{ij}}\right)$
+
+### Observation : 
 
