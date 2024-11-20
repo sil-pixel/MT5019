@@ -668,3 +668,46 @@ Men are 1.255 times more likely to be admitted compared to women. The confidence
 
 There is a statistically significant association between gender and admission status at the University of California, Berkeley during the year of 1975. Men have higher odd and higher probability of admission compared to women. 
 
+## Question 2:
+
+### Approach :
+
+The approach is similar to the previous question. We will analyze what happens if we replace all numbers in the table with one tenth of their original values and perform the same analysis, which we will compare with the previous results.
+
+### Code:
+
+```{r echo=FALSE}
+# Function to analyze data
+analyze_table <- function(data) {
+  # Perform Chi-Squared Test
+  chi_result <- chisq.test(data, correct = FALSE)
+  
+  # Odds Ratio and Risk Ratio
+  odds_ratio_result <- oddsratio(data, method = "wald", rev = "neither")
+  risk_ratio_result <- riskratio(data, rev = "neither")
+  
+  list(
+    "Chi-Squared Test" = chi_result,
+    "Likelihood Ratio" = loglm(~gender + admission, data),
+    "Odds Ratio" = odds_ratio_result$measure,
+    "Risk Ratio" = risk_ratio_result$measure
+  )
+}
+
+# Original analysis
+original_result <- analyze_table(tab2)
+
+# Replace all numbers in the table by one-tenth
+tab2_tenth <- round(tab2 / 10, 0)
+tenth_result <- analyze_table(tab2_tenth)
+
+# Print results for comparison
+list(
+  "Original" = original_result,
+  "One-Tenth" = tenth_result
+)
+```
+
+### Results and Interpretation:
+
+
