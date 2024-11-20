@@ -426,34 +426,47 @@ kable(tab2, format = "latex", booktabs = TRUE, caption = "Admissions Data by Gen
 
 ```
 Our goal is to perform the following analyses:
-  1. Calculate the percentages of admitted and not admitted applicants separately.
+
+  1. Calculate the percentages of admitted and not admitted applicants separately.  
+  
   2. Test for independence between gender and admission using:
-      - Pearson’s Chi-Squared Test
+  
+      - Pearson’s Chi-Squared Test  
       - Likelihood Ratio Test
+      
   3. Calculate the odds ratio and its 95% confidence interval.
-  4. Calculate the risk ratio and its 95% confidence interval.
+  
+  4. Calculate the risk ratio and its 95% confidence interval.  
 
 1. Calculating Percentages
 
 For men:
-  - Total men: $ n_{\text{Men}} = 2691 $
-  - Admitted men: $ a_{\text{Men}} = 1198 $
-  - Not admitted men: $ n_{\text{Men}} - a_{\text{Men}} = 1493 $
+
+  - Total men: $ n_{\text{Men}} = 2691 $  
+  
+  - Admitted men: $ a_{\text{Men}} = 1198 $  
+  
+  - Not admitted men: $ n_{\text{Men}} - a_{\text{Men}} = 1493 $  
 
 Percentages
 
-\text{Percentage Admitted (Men)} = \left( \frac{1198}{2691} \right) \times 100\% \approx 44.53\%
-\text{Percentage Not Admitted (Men)} = 100\% - 44.53\% = 55.47\%
+$\text{Percentage Admitted (Men)} = \left( \frac{1198}{2691} \right) \times 100\% \approx 44.53\%$  
 
-For women:
-  - Total women: $ n_{\text{Women}} = 1835 $
-  - Admitted women: $ a_{\text{Women}} = 557 $
-  - Not admitted women: $ n_{\text{Women}} - a_{\text{Women}} = 1278 $
+$\text{Percentage Not Admitted (Men)} = 100\% - 44.53\% = 55.47\%$
+
+For women:  
+
+  - Total women: $ n_{\text{Women}} = 1835 $  
+
+  - Admitted women: $ a_{\text{Women}} = 557 $  
+
+  - Not admitted women: $ n_{\text{Women}} - a_{\text{Women}} = 1278 $  
   
 Percentages
 
-\text{Percentage Admitted (Women)} = \left( \frac{557}{1835} \right) \times 100\% \approx 30.35\%
-\text{Percentage Not Admitted (Women)} = 100\% - 30.35\% = 69.65\%
+$\text{Percentage Admitted (Women)} = \left( \frac{557}{1835} \right) \times 100\% \approx 30.35\%$  
+
+$\text{Percentage Not Admitted (Women)} = 100\% - 30.35\% = 69.65\%$  
 
 ```{r echo=FALSE}
 # Admissions data (Berkeley)
@@ -472,13 +485,102 @@ knitr::kable(
 ```
 2. Testing for Independence
 
-Null hypothesis ($H_0$): Gender and admission are independent.
+Null hypothesis ($H_0$): Gender and admission are independent.  
+
+Alternative hypothesis ($H_1$): There is an association between gender and admission Status.
+
+Expected counts under $H_0$ are calculated as:  
+
+$E_{ij} = \frac{(\text{Row Total}_i) \times (\text{Column Total}_j)}{\text{Grand Total}}$
+
+  1. Men Admitted:  
+
+    -$E_{11} = \frac{R_1 \times C_1}{N} = \frac{2691 \times 1755}{4526} \approx 1043.46$  
+
+  2. Men not Admitted:  
+
+    -$E_{12} = \frac{R_1 \times C_2}{N} = \frac{2691 \times 2771}{4526} \approx 1647.54$  
+
+  3. Women Admitted:  
+
+    -$E_{21} = \frac{R_2 \times C_1}{N} = \frac{1835 \times 1755}{4526} \approx 711.54$. 
+
+  4. Women not Admitted:  
+
+    -$E_{22} = \frac{R_2 \times C_2}{N} = \frac{1835 \times 2771}{4526} \approx 1123.46$. 
+
+Calculating the Pearson's Chi-Squared Test Statistic:  
+
+$\chi^2 = \sum_{i=1}^{2} \sum_{j=1}^{2} \frac{(O_{ij} - E_{ij})^2}{E_{ij}}$  
+
+Calculating the Likelihood Ratio Test Statistic:  
+
+$G^2 = 2 \sum_{i=1}^{2} \sum_{j=1}^{2} O_{ij} \ln\left( \frac{O_{ij}}{E_{ij}} \right)$  
+
+where:  
+
+  - $O_{ij}$: Observed counts  
+
+  - $E_{ij}$: Expected counts  
+
+The degrees of freedom are calculated for both statistics as $df=(r-1)(c-1)$  
+
+3. Estimating the Odds Ratio
+
+Calculating Odds  
+
+  - Odds of Admission for Men:  
+
+    $\text{Odds}_{\text{Men}} = \frac{\text{Admitted Men}}{\text{Not Admitted Men}}$  
+
+  - Odds of Admission for Women:  
+
+    $\text{OR} = \frac{\text{Odds}{\text{Men}}}{\text{Odds}{\text{Women}}}$  
+
+Calculating the Standard Error of $\log(\text{OR})$:
+
+$SE = \sqrt{ \frac{1}{a_{\text{Men}}} + \frac{1}{b_{\text{Men}}} + \frac{1}{a_{\text{Women}}} + \frac{1}{b_{\text{Women}}} }$
+
+The 95% confidence interval for $\log(\text{OR})$ is calculated as:
+
+$\ln(\text{OR}) \pm Z_{0.975} \times SE$
+
+However we still have to get the confidence interval for the odds ratio by exponentiating the bounds.
+
+4. Estimating the Risk Ratio
+
+Calculating Risks (Probabilities)  
+
+  - Risk of Admission for Men:  
+
+    $P_{\text{Men}} = \frac{\text{Admitted Men}}{\text{Total Men}}$  
+
+  - Risk of Admission for Women:  
+
+    $P_{\text{Women}} = \frac{\text{Admitted Women}}{\text{Total Women}}$  
+
+Calculating Risk Ratio (RR)  
+
+$\text{RR} = \frac{P_{\text{Men}}}{P_{\text{Women}}}$  
+
+Calculating the Standard Error of $\log(\text{RR})$:
+
+$SE = \sqrt{ \frac{1 - P_{\text{Men}}}{a_{\text{Men}}} + \frac{1 - P_{\text{Women}}}{a_{\text{Women}}} }$
+
+The 95% confidence interval for $\log(\text{RR})$ is calculated as:
+
+$\ln(\text{RR}) \pm Z_{0.975} \times SE $
+
+However we still have to get the confidence interval for the risk ratio by exponentiating the bounds.
+
+### Code
 
 ```{r echo=FALSE}
 # Perform chi-squared test
 chisq_result <- chisq.test(tab2, correct = FALSE)
 chisq_result
 ```
+
 ```{r echo=FALSE}
 # Calculate G2 using loglinear model
 loglm_result <- loglm(~ gender + admission, tab2)
@@ -496,9 +598,33 @@ risk_ratio_result <- riskratio(tab2, rev = "neither")
 risk_ratio_result
 ```
 
+### Results and Interpretation
 
+1. Chi-Squared Test:
 
+$ \chi^2 = 92.205, p < 2.2e^{-16} $
 
+The large chi-squared statistic and the small p-value indicate a significant association between gender and admission status. Therefore rejecting the null  hypothesis of independence.
 
+2. Likelihood Ratio Test:
 
+$  G^2 = 93.98, p < 0.001 $
+
+Similarly as the chi-squared test, the likelihood ratio test also indicates a significant association between gender and admission.
+
+3. Odds Ratio:
+
+$  \text{OR} = 1.841, 95\% \text{ CI } (1.624, 2.087) $
+
+According to the odds ratio, men have 1.841 times higher odds of being admitted compared to women. The 95% confidence interval does not include 1, indicating a statistically significant difference in admission odds.
+
+4. Risk Ratio:
+
+$ \text{RR} = 1.467, 95\% \text{ CI } (1.353, 1.591) $
+
+Men are 1.255 times more likely to be admitted compared to women. The confidence interval does not include 1, indicating a statistically significant difference in admission risk.
+
+### Conclusion
+
+There is a statistically significant association between gender and admission status at the University of California, Berkeley during the year of 1975. Men have higher odd and higher probability of admission compared to women. 
 
