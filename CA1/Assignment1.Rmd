@@ -7,91 +7,95 @@ output: pdf_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(knitr)
+library(MASS)
+library(epitools)
 ```
 
 # Summary
 
+This report analyzes opinions on legal abortion among men and women using data from a survey. The responses were summarized in a two-way table, and statistical methods, including percentages, hypothesis testing, odds ratios, and risk ratios, were applied to gain insights. The results are presented with detailed calculations and interpretations.
+
 # Exercise 1:1
 
-## Question 1: 
-
-Percentage in Favor and Against Legal Abortion by Gender :
-
-The survey results are summarized in a 2×2 table showing responses from 
-500 women and 600 men regarding their opinions on legal abortion.
-We calculate the percentages in favor and against legal abortion separately 
-for men and women using the formula:
-
-
-${\text{Percentage (In Favor)} = \frac{\text{Count (In Favor) of the Gender}}{\text{Total Count of the Gender}} \times 100}$
-
-
-${\text{Percentage (Against)} = \frac{\text{Count (Against) of the Gender}}{\text{Total Count of the Gender}} \times 100}$
-
-For Women : 
-
-	•	In Favor:
-
-${\text{Percentage (In Favor) for Women} = \frac{309}{500} \times 100 = 61.8\%}$
-
-	•	Against:
-
-${\text{Percentage (Against) for Women} = \frac{191}{500} \times 100 = 38.2\%}$
-
-For Men:
-
-	•	In Favor:
-
-${\text{Percentage (In Favor) for Men} = \frac{319}{600} \times 100 = 53.2\%}$
-
-	•	Against:
-
-${\text{Percentage (Against) for Men} = \frac{281}{600} \times 100 = 46.8\%}$
-
-
-Summary:
-
-```{r percentage-summary, echo=FALSE}
-library(knitr)
-# Create a data frame for the summary
-summary_table <- data.frame(
-  Gender = c("Women", "Men"),
-  `Percentage In Favor` = c(61.8, 53.2),
-  `Percentage Against` = c(38.2, 46.8)
-)
-
-# Print the summary table
-kable(summary_table, 
-      col.names = c("Gender", "% In Favor", "% Against"), 
-      caption = "Percentage In Favor and Against Legal Abortion by Gender", 
-      align = c("l", "c", "c"))
-```
-
-
-From the analysis, a higher percentage of women (61.8%) support legal abortion 
-compared to men (53.2%). Similarly, a larger percentage of men (46.8%) 
-are against legal abortion compared to women (38.2%).
-
-
-## Question 2: 
+## Question 1: Percentage in Favor and Against Legal Abortion by Gender
 
 ### Approach : 
 
-Define Hypotheses : 
+The percentages for being “in favor” and “against” legal abortion for men and women were calculated using the following formulas :
 
-Null Hypothesis (${H_0}$) : There is no difference in opinions between men and
+- Percentage (In Favor) :
+
+${\text{Percentage (In Favor)} = \frac{\text{Count (In Favor) of the Gender}}{\text{Total Count of the Gender}} \times 100}$
+
+- Percentage (Against) :
+
+${\text{Percentage (Against)} = \frac{\text{Count (Against) of the Gender}}{\text{Total Count of the Gender}} \times 100}$
+
+### Calculations : 
+```{r percentage-calculations, echo=TRUE}
+# Calculate percentages
+women_in_favor <- 309
+women_total <- 500
+men_in_favor <- 319
+men_total <- 600
+women_against <- women_total - women_in_favor
+men_against <- men_total - men_in_favor
+
+# Percentages
+women_in_favor_pct <- round((women_in_favor / women_total) * 100, 1)
+women_against_pct <- round((women_against / women_total) * 100, 1)
+men_in_favor_pct <- round((men_in_favor / men_total) * 100, 1)
+men_against_pct <- round((men_against / men_total) * 100, 1)
+```
+
+### Summary : 
+
+```{r percentage-summary, echo=FALSE}
+# Create summary table
+summary_table <- data.frame(
+  Gender = c("Women", "Men"),
+  `Percentage In Favor` = c(women_in_favor_pct, men_in_favor_pct),
+  `Percentage Against` = c(women_against_pct, men_against_pct)
+)
+
+kable(summary_table, col.names = c("Gender", "% In Favor", "% Against"),
+      caption = "Percentage In Favor and Against Legal Abortion by Gender", align = c("l", "c", "c"))
+```
+
+
+### Analysis : 
+
+- Women: 61.8% are in favor, while 38.2% are against legal abortion.
+- Men: 53.2% are in favor, while 46.8% are against legal abortion.
+
+## Question 2: Hypothesis Testing (Pearson’s (X^2) and Likelihood Ratio (G^2))
+
+### Approach : 
+
+#### 1. Hypotheses : 
+
+- Null Hypothesis (${H_0}$) : There is no difference in opinions between men and
 women on legal abortion.
 
-Alternative Hypothesis (${H_A}$) : There is a difference in opinions between
+- Alternative Hypothesis (${H_A}$) : There is a difference in opinions between
 men and women on legal abortion.
 
-The formula for Pearson’s Chi-Squared Statistic (${X^2}$) is:
+#### 2. Expected Counts : 
+
+Under ${H_0}$, expected counts are calculated using: 
+
+${E_{ij} = \frac{\text{i-th Row Total} \times \text{j-th Column Total}}{\text{Grand Total}}}$
+
+#### 3. Pearson’s Chi-Squared Statistic :
+
+The formula for Pearson’s Chi-Squared Statistic (${X^2}$) is: 
 
 ${X^2 = \sum_{i=1}^{r} \sum_{j=1}^{c} \frac{(O_{ij} - E_{ij})^2}{E_{ij}}}$
 
-and 
+#### 4. Likelihood Ratio Statistic : 
 
-The formula for Likelihood Ratio Statistic (${G^2}$) is:
+The formula for Likelihood Ratio Statistic (${G^2}$) is: 
 
 ${G^2 = 2 \sum_{i=1}^{r} \sum_{j=1}^{c} O_{ij} \log\left(\frac{O_{ij}}{E_{ij}}\right)}$
 
@@ -99,103 +103,100 @@ where ${O_{ij}}$ is the Observed Count, ${E_{ij}}$ is the Expected Count
 of (i,j) cell with i-th index of X and j-th index of Y, r is the total number
 of rows and c is the total number of columns.
 
-The observed counts are given in the 2×2 table where 
-${O_{11}}$ = 309, ${O_{12}}$ = 191, ${O_{21}}$ = 319, ${O_{22}}$ = 281.
+### Calculations : 
 
-The r and c values are also implied for a 2×2 table as r = 2 and c = 2.
+```{r hypothesis-testing, echo=TRUE}
+# Observed counts
+observed <- matrix(c(309, 191, 319, 281), nrow = 2, byrow = TRUE)
+rownames(observed) <- c("Women", "Men")
+colnames(observed) <- c("In Favor", "Against")
 
-Let us calculate the Expected Counts for each cell.
+# Totals
+row_totals <- rowSums(observed)
+col_totals <- colSums(observed)
+grand_total <- sum(observed)
 
-Under ${H_0}$, expected counts are calculated using:
+# Expected counts
+expected <- outer(row_totals, col_totals) / grand_total
 
-${E_{ij} = \frac{\text{i-th Row Total} \times \text{j-th Column Total}}{\text{Grand Total}}}$
+# Pearson's X^2
+X2 <- sum((observed - expected)^2 / expected)
 
+# Likelihood Ratio G^2
+G2 <- 2 * sum(observed * log(observed / expected))
 
-Using the row and column totals:
+# Degrees of freedom
+df <- (nrow(observed) - 1) * (ncol(observed) - 1)
 
-${E_{11} = \frac{500 \times 628}{1100} = 285.45}$
-
-${E_{12} = \frac{500 \times 472}{1100} = 214.55}$
-
-${E_{21} = \frac{600 \times 628}{1100} = 342.55}$
-
-${E_{22} = \frac{600 \times 472}{1100} = 257.45}$
-
-
-Let us calculate the each term in Pearson’s Chi-Squared Statistic (${X^2}$) :
-
-For cell (1,1): ${\frac{(309 - 285.45)^2}{285.45} = 1.97}$
-
-For cell (1,2): ${\frac{(191 - 214.55)^2}{214.55} = 2.84}$
-
-For cell (2,1): ${\frac{(319 - 342.55)^2}{342.55} = 1.71}$
-
-For cell (2,2): ${\frac{(281 - 257.45)^2}{257.45} = 2.14}$
+# P-values
+p_value_X2 <- pchisq(X2, df = df, lower.tail = FALSE)
+p_value_G2 <- pchisq(G2, df = df, lower.tail = FALSE)
 
 
-Summing these terms:
+```
 
-${X^2}$ = 1.97 + 2.84 + 1.71 + 2.14 = 8.66
+### Output : 
 
-Degrees of freedom is defined by (r -1)(c -1) = (2-1)(2-1) = 1.
-
-Let us calculate the P-value for ${X^2}$ using a chi-squared table, which gives us :
-
-${P(X^2 > 8.66) = 0.0032}$
-
-Let us calculate the each term in Likelihood Ratio Statistic (${G^2}$) :
-
-For cell (1,1): ${2 \times 309 \times \log\left(\frac{309}{285.45}\right) = 15.88}$
-
-For cell (1,2): ${2 \times 191 \times \log\left(\frac{191}{214.55}\right) = 24.20}$
-
-For cell (2,1): ${2 \times 319 \times \log\left(\frac{319}{342.55}\right) = 14.75}$
-
-For cell (2,2): ${2 \times 281 \times \log\left(\frac{281}{257.45}\right) = 24.61}$
-
-Summing these terms:
-
-${G^2}$ = 15.88 + 24.20 + 14.75 + 24.61 = 79.44
-
-Degrees of freedom here (r-1)(c-1) = 1 as well.
-
-Let us calculate the P-value for ${G^2}$ using a chi-squared table as well, which gives us :
-
-${P(G^2 > 79.44) \approx 0.003}$
+```{r echo=FALSE}
+# Results
+results <- data.frame(
+  Statistic = c("Pearson's X^2", "Likelihood Ratio G^2"),
+  Value = c(X2, G2),
+  `P-value` = c(p_value_X2, p_value_G2)
+)
+kable(results, caption = "Hypothesis Testing Results", align = c("l", "c", "c"))
+```
 
 ### Conclusion : 
 
 We use a significance level ${\alpha}$ = 0.05 to test our null hypothesis ${H_0}$.
-We see that both the ${X^2}$ and ${G^2}$ statistics yield small p-values, 
-much lesser than 0.05. Hence, we reject the null hypothesis ${H_0}$, which 
-indicates that there is a significant difference in opinions on legal abortion 
+Both the ${X^2}$ and ${G^2}$ statistics yield small p-values, much lesser than 0.05. 
+Hence, we reject the null hypothesis ${H_0}$, which indicates that there is a significant difference in opinions on legal abortion 
 between men and women.
 
-## Question 3: 
+## Question 3: Odds Ratio and Confidence Interval
+
+## Approach :
+
+### The Odds Ratio :
 
 The odds ratio (OR) is a measure used to quantify the strength of association 
-between two categorical variables. For the given 2×2 table regarding opinions 
-on legal abortion among men and women, we calculate the odds ratio and 
-its 95% confidence interval. Depending on the chosen event and conditioning,
-multiple odds ratios can be formulated. Below, we calculate the odds ratio of 
-being “in favor” of legal abortion for men compared to women.
+between two categorical variables. 
 
-### Defining the Odds :
+#### Odds for Women:
 
-Odds for Women:
+${\text{Odds (Women)} = \frac{\text{In Favor (Women)}}{\text{Against (Women)}}}$
 
-${\text{Odds (Women)} = \frac{\text{In Favor (Women)}}{\text{Against (Women)}} = \frac{309}{191} = 1.6183}$
+#### Odds for Men:
 
-Odds for Men:
+${\text{Odds (Men)} = \frac{\text{In Favor (Men)}}{\text{Against (Men)}}}$
 
-${\text{Odds (Men)} = \frac{\text{In Favor (Men)}}{\text{Against (Men)}} = \frac{319}{281} = 1.1352}$
-
-
-Odds Ratio (OR) :
+#### Odds Ratio (OR) :
 
 The odds ratio compares the odds of being “in favor” for men to that for women:
 
-${\text{OR} = \frac{\text{Odds (Men)}}{\text{Odds (Women)}} = \frac{1.1352}{1.6183} = 0.7015}$
+${\text{OR} = \frac{\text{Odds (Men)}}{\text{Odds (Women)}}}$
+
+### Calculations : 
+
+```{r odds-ratio, echo=TRUE}
+# Odds calculation
+odds_women <- women_in_favor / women_against
+odds_men <- men_in_favor / men_against
+# Odds ratio
+odds_ratio <- odds_men / odds_women
+```
+
+### Output : 
+
+```{r echo=FALSE}
+# Results
+results <- data.frame(
+  Odds = c("Odds Women", "Odds Men", "Odds Ratio"),
+  Value = c(odds_women, odds_men, odds_ratio)
+)
+kable(results, caption = "Odds Ratio Results", align = c("l", "c", "c"))
+```
 
 Alternative Odds Ratios can be formulated depending on the conditioning variable:
 
@@ -210,46 +211,36 @@ ${\text{OR} = \frac{\text{Men Against / Women Against}}{\text{Men In Favor / Wom
 Each odds ratio provides different insights based on the event being studied and 
 the conditioning variable.
 
+### Confidence Interval : 
+
 To compute the 95% confidence interval for the odds ratio, let us use the 
 logarithm of odds ratio for a more accurate result and then apply the delta method 
 to get the confidence interval of odds ratio from the confidence interval 
 of logarithm of odds ratio.
 
-Logarithm of Odds Ratio:
+### Calculations : 
 
-${\log(\text{OR}) = \log(0.7015) = -0.3544}$
+```{r echo=TRUE}
+# Log odds ratio and standard error
+log_odds_ratio <- log(odds_ratio)
+se_log_odds <- sqrt(sum(1 / observed))
 
-Standard Error of ${\log(\text{OR})}$:
+# Confidence interval
+z <- qnorm(0.975)
+ci_lower <- exp(log_odds_ratio - z * se_log_odds)
+ci_upper <- exp(log_odds_ratio + z * se_log_odds)
+```
 
-The formula for the standard error is:
+### Output : 
 
-${\text{SE} = \sqrt{\frac{1}{O_{11}} + \frac{1}{O_{12}} + \frac{1}{O_{21}} + \frac{1}{O_{22}}}}$
-
-where ${O_{ij}}$ are the observed frequencies from the table for the (i,j) cell.
-
-Substituting the values:
-
-${\text{SE} = \sqrt{\frac{1}{309} + \frac{1}{191} + \frac{1}{319} + \frac{1}{281}} = 0.1191}$
-
-The 95% confidence interval for ${\log(\text{OR})}$ is given by:
-
-${\log(\text{OR}) \pm z_{0.975} \times \text{SE}}$
-
-Using ${z_{0.975} = 1.96}$:
-
-${-0.3544 \pm 1.96 \times 0.1191 = (-0.5878, -0.1210)}$
-
-Exponentiating to Get the Confidence Interval for OR:
-
-To get the confidence interval for the odds ratio, exponentiate the bounds:
-
-${\text{Lower Bound} = e^{-0.5878} = 0.5560}$
-
-${\text{Upper Bound} = e^{-0.1210} = 0.8862}$
-
-Thus, the 95% confidence interval for the odds ratio is:
-
-${(0.556, 0.886)}$
+```{r echo=FALSE}
+# Results
+odds_results <- data.frame(
+  Measure = c("Odds Ratio", "95% CI Lower", "95% CI Upper"),
+  Value = c(odds_ratio, ci_lower, ci_upper)
+)
+kable(odds_results, caption = "Odds Ratio and Confidence Interval", align = c("l", "c"))
+```
 
 ###  Interpretation
 
@@ -261,77 +252,95 @@ The estimated odds ratio indicates that the women are significantly more likely
 to support legal abortion compared to men and the 95% confidence interval of 
 the odds ratio support that indication. 
 
-## Question 4: 
+## Question 4: Risk Ratio and Confidence Interval
+
+### Approach :
+
+#### The Risk Ratio :
 
 The risk ratio (also called relative risk, RR) quantifies the likelihood of an 
-event occurring in one group relative to another group. For the given 2×2 table
-regarding opinions on legal abortion among men and women, we calculate the risk 
-ratio and its 95% confidence interval. Below, we calculate the risk ratio of 
-being “in favor” of legal abortion for men compared to women.
-
-### Defining the Risk
+event occurring in one group relative to another group.
 
 The risk refers to the probability of being “in favor” of legal abortion, 
 calculated as:
 
 ${\text{Risk} = \frac{\text{Number of Individuals “In Favor”}}{\text{Total Number of Individuals in the Gender}}}$
 
-Risk for Women:
+#### Risk for Women:
 
-${\text{Risk (Women)} = \frac{\text{Number of Women In Favor}}{\text{Total (Women)}} = \frac{309}{500} = 0.618}$
+${\text{Risk (Women)} = \frac{\text{Number of Women In Favor}}{\text{Total (Women)}}}$
 
-Risk for Men:
+#### Risk for Men:
 
-${\text{Risk (Men)} = \frac{\text{Number of Men In Favor}}{\text{Total (Men)}} = \frac{319}{600} = 0.532}$
+${\text{Risk (Men)} = \frac{\text{Number of Men In Favor}}{\text{Total (Men)}}}$
 
 
-Risk Ratio (Relative Risk) :
+#### Risk Ratio (Relative Risk) :
 
 The risk ratio (RR) compares the risk of being “in favor” for men to that for women:
 
-${\text{RR} = \frac{\text{Risk (Men)}}{\text{Risk (Women)}} = \frac{0.532}{0.618} = 0.861}$
+${\text{RR} = \frac{\text{Risk (Men)}}{\text{Risk (Women)}}}$
+
+### Calculations : 
+
+```{r risk-ratio, echo=TRUE}
+# Risk calculation
+risk_women <- women_in_favor / women_total
+risk_men <- men_in_favor / men_total
+
+# Risk ratio
+risk_ratio <- risk_men / risk_women
+```
+
+### Output : 
+
+```{r echo=FALSE}
+results <- data.frame(
+  Risk = c("Risk Women", "Risk Men", "Risk Ratio"),
+  Value = c(risk_women, risk_men, risk_ratio)
+)
+kable(results, caption = "Risk Ratio Results", align = c("l", "c", "c"))
+```
+
+### Analysis : 
 
 This value indicates that men are about 86.1% as likely as women to be 
 “in favor” of legal abortion.
+
+#### Confidence Interval :
 
 To compute the 95% confidence interval for the risk ratio, let us use the 
 logarithm of risk ratio for a more accurate result, similar to odds ratio and 
 then apply the delta method to get the confidence interval of risk ratio from 
 the confidence interval of logarithm of risk ratio.
 
-Logarithm of Risk Ratio:
-
-${\log(\text{RR}) = \log(0.861) = -0.1493}$
-
-Standard Error of ${\log(\text{RR})}$ :
-
 The formula for standard error is:
 
 ${\text{SE} = \sqrt{\frac{1}{\text{In Favor (Men)}} - \frac{1}{\text{Total (Men)}} + \frac{1}{\text{In Favor (Women)}} - \frac{1}{\text{Total (Women)}}}}$
 
-Substituting the values:
+### Calculations : 
 
-${\text{SE} = \sqrt{\frac{1}{319} - \frac{1}{600} + \frac{1}{309} - \frac{1}{500}} = 0.0655}$
+```{r echo=TRUE}
+# Log risk ratio and standard error
+log_risk_ratio <- log(risk_ratio)
+se_log_risk <- sqrt(1 / women_in_favor - 1 / women_total + 1 / men_in_favor - 1 / men_total)
 
-The 95% confidence interval for ${\log(\text{RR})}$ is given by:
+# Confidence interval
+ci_lower_rr <- exp(log_risk_ratio - z * se_log_risk)
+ci_upper_rr <- exp(log_risk_ratio + z * se_log_risk)
 
-${\log(\text{RR}) \pm z_{0.975} \times \text{SE}}$
+```
 
-Using ${z_{0.975} = 1.96}$ :
+### Output : 
 
-${-0.1493 \pm 1.96 \times 0.0655 = (-0.2788, -0.0198)}$
-
-Exponentiating to Get the Confidence Interval for RR:
-
-To get the confidence interval for the risk ratio, exponentiate the bounds:
-
-${\text{Lower Bound} = e^{-0.2788} = 0.7565}$
-
-${\text{Upper Bound} = e^{-0.0198} = 0.9804}$
-
-Thus, the 95% confidence interval for the risk ratio is:
-
-(0.756, 0.980)
+```{r echo=FALSE}
+# Results
+risk_results <- data.frame(
+  Measure = c("Risk Ratio", "95% CI Lower", "95% CI Upper"),
+  Value = c(risk_ratio, ci_lower_rr, ci_upper_rr)
+)
+kable(risk_results, caption = "Risk Ratio and Confidence Interval", align = c("l", "c"))
+```
 
 ### Interpretation
 
@@ -344,21 +353,24 @@ to men and the 95% confidence interval of the risk ratio support that indication
 
 ### Comparison with Odds Ratio
 
-Odds Ratio:  Previously calculated as 0.7015, quantifying the odds of being 
+- Odds Ratio:  Previously calculated as 0.7015, quantifying the odds of being 
             “in favor” for men compared to women.
             
-Risk Ratio: Calculated as 0.861, quantifying the relative probability of being “in favor.”
+- Risk Ratio: Calculated as 0.861, quantifying the relative probability of being “in favor.”
 
 The odds ratio measures the ratio of odds, which can overstate the association, 
 especially when the event probability is high (e.g., large proportions of people “in favor”).
 The risk ratio provides a more intuitive interpretation as it measures the relative likelihood.
 
 
-## Question 5: 
+## Question 5: Verification of Previous Calculations
 
 ### Approach : 
 
-Prepare the data and calculate row percentages
+#### 1. Generate Frequency Table and Calculate Row Percentages
+
+Verify the calculations for percentages, hypothesis testing, odds ratio, and risk ratio from Questions 1–4 using built-in R functions. The results are compared with the manual calculations presented earlier.
+
 ```{r echo=FALSE}
 #prepare the data and calculate row percentages
 tab1<- as.table(rbind(c(309, 191), c(319, 281)))
@@ -367,24 +379,27 @@ addmargins(tab1)
 addmargins(prop.table(tab1,1),2)
 ```
 
-Calculate X2, G2 and p-values
+#### 2. Calculate X2, G2 and p-values
 
 ```{r echo=FALSE}
 # Calculate X2, G2 and p-values
 chisq.test(tab1,correct=FALSE)
 # install.packages("MASS")
-library(MASS)
-loglm(~gender+opinion,tab1)
-# the MASS package must have been installed
+
+log_likelihood_ratio <- loglm(~gender+opinion,tab1)
+print(log_likelihood_ratio)
 # The function loglm fits a loglinear model, but we leave the details about that.
 # Log linear models will be handled in assignment 3 but with the function glm instead of loglm.
 ```
+##### Comparison : 
+- (X^2) statistic, degrees of freedom, and p-value displayed, matching the manual calculations.
+- (G^2) statistic and p-value are also displayed, confirming the earlier results.
 
-Calculate odds ratio and 95% confidence interval
+#### 3. Calculate Odds Ratio and Confidence Interval
+
 ```{r echo=FALSE}
 # Calculate odds ratio and 95% confidence interval
 # install.packages("epitools")
-library(epitools)             
 oddsratio(tab1, method = "wald", rev="neither")
 ```
 
@@ -407,6 +422,31 @@ reverse both : odds of women to men :
 # To obtain the intended odds/risk ratio, you may need to reverse the rows or columns:
 oddsratio(tab1, method = "wald", rev="both")
 ```
+
+#### Comparison :
+
+The odds ratio and its confidence interval are verified, and the results align with the manually calculated values when the appropriate rev option is used.
+
+
+#### 4. Calculate Risk Ratio and Confidence Interval
+
+```{r echo=FALSE}
+# Calculate risk ratio with default settings
+risk_ratio_default <- riskratio(tab1, rev = "neither")
+print(risk_ratio_default)
+
+# Check alternative row/column reversals to match the intended risk ratio
+risk_ratio_row <- riskratio(tab1, rev = "row")
+risk_ratio_col <- riskratio(tab1, rev = "col")
+risk_ratio_both <- riskratio(tab1, rev = "both")
+print(risk_ratio_row)
+print(risk_ratio_col)
+print(risk_ratio_both)
+```
+
+#### Comparison :
+
+The risk ratio and its confidence interval are verified, and the results align with the manually calculated values when the appropriate rev option is used.
 
 
 # Exercise 1:2
@@ -442,11 +482,11 @@ Our goal is to perform the following analyses:
 
 For men:
 
-  - Total men: $ n_{\text{Men}} = 2691 $  
+  - Total men: $n_{\text{Men}} = 2691$  
   
-  - Admitted men: $ a_{\text{Men}} = 1198 $  
+  - Admitted men: $a_{\text{Men}} = 1198$  
   
-  - Not admitted men: $ n_{\text{Men}} - a_{\text{Men}} = 1493 $  
+  - Not admitted men: $n_{\text{Men}} - a_{\text{Men}} = 1493$  
 
 Percentages
 
@@ -456,11 +496,11 @@ $\text{Percentage Not Admitted (Men)} = 100\% - 44.53\% = 55.47\%$
 
 For women:  
 
-  - Total women: $ n_{\text{Women}} = 1835 $  
+  - Total women: $n_{\text{Women}} = 1835$  
 
-  - Admitted women: $ a_{\text{Women}} = 557 $  
+  - Admitted women: $a_{\text{Women}} = 557$  
 
-  - Not admitted women: $ n_{\text{Women}} - a_{\text{Women}} = 1278 $  
+  - Not admitted women: $n_{\text{Women}} - a_{\text{Women}} = 1278$  
   
 Percentages
 
@@ -495,19 +535,19 @@ $E_{ij} = \frac{(\text{Row Total}_i) \times (\text{Column Total}_j)}{\text{Grand
 
   1. Men Admitted:  
 
-    -$E_{11} = \frac{R_1 \times C_1}{N} = \frac{2691 \times 1755}{4526} \approx 1043.46$  
+      $E_{11} = \frac{R_1 \times C_1}{N} = \frac{2691 \times 1755}{4526} \approx 1043.46$  
 
   2. Men not Admitted:  
 
-    -$E_{12} = \frac{R_1 \times C_2}{N} = \frac{2691 \times 2771}{4526} \approx 1647.54$  
+      $E_{12} = \frac{R_1 \times C_2}{N} = \frac{2691 \times 2771}{4526} \approx 1647.54$  
 
   3. Women Admitted:  
 
-    -$E_{21} = \frac{R_2 \times C_1}{N} = \frac{1835 \times 1755}{4526} \approx 711.54$. 
+      $E_{21} = \frac{R_2 \times C_1}{N} = \frac{1835 \times 1755}{4526} \approx 711.54$. 
 
   4. Women not Admitted:  
 
-    -$E_{22} = \frac{R_2 \times C_2}{N} = \frac{1835 \times 2771}{4526} \approx 1123.46$. 
+      $E_{22} = \frac{R_2 \times C_2}{N} = \frac{1835 \times 2771}{4526} \approx 1123.46$. 
 
 Calculating the Pearson's Chi-Squared Test Statistic:  
 
@@ -569,7 +609,7 @@ $SE = \sqrt{ \frac{1 - P_{\text{Men}}}{a_{\text{Men}}} + \frac{1 - P_{\text{Wome
 
 The 95% confidence interval for $\log(\text{RR})$ is calculated as:
 
-$\ln(\text{RR}) \pm Z_{0.975} \times SE $
+${\ln(\text{RR}) \pm Z_{0.975} \times SE}$
 
 However we still have to get the confidence interval for the risk ratio by exponentiating the bounds.
 
@@ -602,25 +642,25 @@ risk_ratio_result
 
 1. Chi-Squared Test:
 
-$ \chi^2 = 92.205, p < 2.2e^{-16} $
+${\chi^2 = 92.205, p < 2.2e^{-16}}$
 
 The large chi-squared statistic and the small p-value indicate a significant association between gender and admission status. Therefore rejecting the null  hypothesis of independence.
 
 2. Likelihood Ratio Test:
 
-$  G^2 = 93.98, p < 0.001 $
+${G^2 = 93.98, p < 0.001}$
 
 Similarly as the chi-squared test, the likelihood ratio test also indicates a significant association between gender and admission.
 
 3. Odds Ratio:
 
-$  \text{OR} = 1.841, 95\% \text{ CI } (1.624, 2.087) $
+${\text{OR} = 1.841, 95\% \text{ CI } (1.624, 2.087)}$
 
 According to the odds ratio, men have 1.841 times higher odds of being admitted compared to women. The 95% confidence interval does not include 1, indicating a statistically significant difference in admission odds.
 
 4. Risk Ratio:
 
-$ \text{RR} = 1.467, 95\% \text{ CI } (1.353, 1.591) $
+${\text{RR} = 1.467, 95\% \text{ CI } (1.353, 1.591)}$
 
 Men are 1.255 times more likely to be admitted compared to women. The confidence interval does not include 1, indicating a statistically significant difference in admission risk.
 
