@@ -797,8 +797,71 @@ knitr::kable(
 
 The risk ratio across the three datasets shows a consistent value, varied only slightly. The confidence interval, however, widens as the sample size decreases, reflecting the increased uncertainty in the estimate. So for the original dataset, the risk ratio is 1.255, with a 95% confidence interval of [1.200, 1.314], which is very narrow, reflecting high precision. On the other hand, for the one-hundredth dataset, the risk ratio is 1.232, with a 95% confidence interval of [0.781, 1.941], which is much wider, reflecting low precision. Moreover, for the original dataset, the confidence interval does not include 1, indicating statistical significance. However, for the one-hundredth dataset, the confidence interval includes 1, indicating no statistical significance.
 
-### Conclusion
+### Conclusion:
 
 This question helps us highlight the importance of a sufficiently large sample size for reliabale statistical inference. While relative measures such as odds and risk ratios remain relatively stable across different sample sizes, the precision of the estimates decreases as the sample size decreases. In addition, absolute measures such as $\chi^2$ and $G^2$ lose significance as the sample size decreases.
 
 ## Question 3:
+
+### Approach :
+
+For this question, we will analyze a completely new 2x2 contingency table, such that:
+
+1. The sample odd ratio($ \hat{\theta} $) lies within the interval 0.99,1.01
+
+2. The corresponding unkown population odds ratio ($\hat{\theta}$) differs significantly from 1
+
+So in summary, the odd ratio has to be close to 1, and its confidence interval cannot include 1, indicating statistical significance.
+
+The general fomrula for the odds ratio as previously stated is:
+
+$\text{Odds Ratio} (\hat{\theta}) = \frac{(a/c)}{(b/d)} = \frac{a \cdot d}{b \cdot c}$
+
+Where a,b,c,d are the cell counts in the 2x2 table. To achive the requirements we need  $\hat{\theta} \approx 1$ meaning that  $a/c \approx b/d$ or $a \cdot d \approx b \cdot c$.  To ensure  $\theta \neq 1$  we have to use a large sample size to narrow the confidence interval and exclude 1. Finally we have to calculate the confidence interval $\ln(\hat{\theta}) \pm Z_{0.975} \cdot \text{SE}$ and exponentiate the bounds to get the confidence interval for the odds ratio. 
+
+For this we will have to iteratively adjust  a,b,c,d to meet both conditions.
+
+### Code:
+```{r echo=FALSE}
+# Function to compute odds ratio and confidence interval
+compute_odds_ratio <- function(a, b, c, d) {
+  OR <- (a * d) / (b * c)
+  ln_OR <- log(OR)
+  SE <- sqrt(1/a + 1/b + 1/c + 1/d)
+  CI_lower <- exp(ln_OR - 1.96 * SE)
+  CI_upper <- exp(ln_OR + 1.96 * SE)
+  
+  list(
+    OR = OR,
+    CI = c(CI_lower, CI_upper)
+  )
+}
+
+# Initialize table counts with large values
+a <- 1000
+b <- 1000
+c <- 1001
+d <- 1001
+
+# Compute initial odds ratio and confidence interval
+result <- compute_odds_ratio(a, b, c, d)
+
+# Adjust counts iteratively to meet conditions
+while (result$OR < 0.99 || result$OR > 1.01 || result$CI[1] <= 1 || result$CI[2] >= 1) {
+  # Increment values to adjust odds ratio closer to 1
+  a <- a + 1
+  c <- c + 1
+  
+  # Recalculate odds ratio and confidence interval
+  result <- compute_odds_ratio(a, b, c, d)
+}
+
+# Print final table and results
+cat("Final Table:\n")
+cat("a =", a, "b =", b, "c =", c, "d =", d, "\n")
+cat("Odds Ratio =", result$OR, "\n")
+cat("95% Confidence Interval =", result$CI, "\n")
+```
+### Results and Interpretation:
+
+### Conclusion:
