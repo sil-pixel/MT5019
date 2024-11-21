@@ -635,6 +635,7 @@ chisq_result
 
 ```{r echo=FALSE}
 tab2_table <- as.table(tab2)
+tab2_table
 # Calculate G2 using loglinear model
 loglm_result <- loglm(~ gender + admission, tab2_table)
 loglm_result
@@ -819,49 +820,63 @@ $\text{Odds Ratio} (\hat{\theta}) = \frac{(a/c)}{(b/d)} = \frac{a \cdot d}{b \cd
 
 Where a,b,c,d are the cell counts in the 2x2 table. To achive the requirements we need  $\hat{\theta} \approx 1$ meaning that  $a/c \approx b/d$ or $a \cdot d \approx b \cdot c$.  To ensure  $\theta \neq 1$  we have to use a large sample size to narrow the confidence interval and exclude 1. Finally we have to calculate the confidence interval $\ln(\hat{\theta}) \pm Z_{0.975} \cdot \text{SE}$ and exponentiate the bounds to get the confidence interval for the odds ratio. 
 
-For this we will have to iteratively adjust  a,b,c,d to meet both conditions.
 
 ### Code:
 ```{r echo=FALSE}
-# Function to compute odds ratio and confidence interval
-compute_odds_ratio <- function(a, b, c, d) {
-  OR <- (a * d) / (b * c)
-  ln_OR <- log(OR)
-  SE <- sqrt(1/a + 1/b + 1/c + 1/d)
-  CI_lower <- exp(ln_OR - 1.96 * SE)
-  CI_upper <- exp(ln_OR + 1.96 * SE)
-  
-  list(
-    OR = OR,
-    CI = c(CI_lower, CI_upper)
+library(MASS)
+# Create the contingency table
+tab5 <- matrix(
+  c(500000, 500500, 501515, 499090), # Data in row-major order
+  nrow = 2,               # Two rows
+  byrow = TRUE,           # Fill matrix by rows
+  dimnames = list(
+    gender = c("Men", "Women"),        # Row names
+    admission = c("Admitted", "Not Admitted") # Column names
   )
-}
+)
+# Display the table
+knitr::kable(
+  tab5,
+  caption = "Summary Table"
+)
 
-# Initialize table counts with large values
-a <- 1000
-b <- 1000
-c <- 1001
-d <- 1001
+# Convert to table
+tab_cont <- as.table(tab5)
+tab_cont
+```
 
-# Compute initial odds ratio and confidence interval
-result <- compute_odds_ratio(a, b, c, d)
+```{r echo=FALSE}
+# Perform likelihood ratio test
+lr_result <- loglm(~ gender + admission,tab_cont)
 
-# Adjust counts iteratively to meet conditions
-while (result$OR < 0.99 || result$OR > 1.01 || result$CI[1] <= 1 || result$CI[2] >= 1) {
-  # Increment values to adjust odds ratio closer to 1
-  a <- a + 1
-  c <- c + 1
-  
-  # Recalculate odds ratio and confidence interval
-  result <- compute_odds_ratio(a, b, c, d)
-}
+# Perform chi-squared test
+chi_result <- chisq.test(tab, correct = FALSE)
 
-# Print final table and results
-cat("Final Table:\n")
-cat("a =", a, "b =", b, "c =", c, "d =", d, "\n")
-cat("Odds Ratio =", result$OR, "\n")
-cat("95% Confidence Interval =", result$CI, "\n")
+# Print results
+cat("Table:\n")
+print(tab_cont)
+cat("\nLikelihood Ratio Test:\n")
+print(lr_result)
+
 ```
 ### Results and Interpretation:
 
+1. Odds Ratio($\hat{\theta}$:
+
+Using the formula:
+
+ - $\hat{\theta} = \frac{(500,000 \cdot 499,000)}{(500,500 \cdot 501,515)} \approx 0.995$
+
+2. Confidence Interval:
+
+ - $[0.990, 0.999]$ 
+
+3. Statistical tests:
+
+  - Likelihood Ratio Test: $G^2 = 4.275, p = 0.0387$
+  
+  - Chi-Squared Test: $\chi^2 = 4.275, p = 0.0386$
+  
 ### Conclusion:
+
+This exercise illustrates the distinction between statistical significance and practical significance. While the odds ratio is very close to 1, the large sample size ensures a narrow confidence interval, leading to statistical significance. For an accurate report we should focus on effect sizes and their real-world implications rather than just statistical significance with p-values alone.
