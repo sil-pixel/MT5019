@@ -519,9 +519,9 @@ Our goal is to perform the following analyses:
   
   4. Calculate the risk ratio and its 95% confidence interval.  
 
-#### 1. Calculating Percentages:
+**1. Calculating Percentages:**
 
-For men:
+  **For Men:**
 
   - Total men: $n_{\text{Men}} = 2691$  
   
@@ -529,13 +529,13 @@ For men:
   
   - Not admitted men: $n_{\text{Men}} - a_{\text{Men}} = 1493$  
 
-**Percentages**
+**Percentages For Men:**
 
 $\text{Percentage Admitted (Men)} = \left( \frac{1198}{2691} \right) \times 100\% \approx 44.53\%$  
 
 $\text{Percentage Not Admitted (Men)} = 100\% - 44.53\% = 55.47\%$
 
-For women:  
+**For women:**
 
   - Total women: $n_{\text{Women}} = 1835$  
 
@@ -543,7 +543,7 @@ For women:
 
   - Not admitted women: $n_{\text{Women}} - a_{\text{Women}} = 1278$  
   
-**Percentages**
+**Percentages For Women:**
 
 $\text{Percentage Admitted (Women)} = \left( \frac{557}{1835} \right) \times 100\% \approx 30.35\%$  
 
@@ -564,7 +564,7 @@ knitr::kable(
   align = c("l", "c", "c")
 )
 ```
-#### 2. Testing for Independence:
+**2. Testing for Independence:**
 
 Null hypothesis ($H_0$): Gender and admission are independent.  
 
@@ -606,7 +606,7 @@ where:
 
 The degrees of freedom are calculated for both statistics as $df=(r-1)(c-1)$  
 
-#### 3. Estimating the Odds Ratio:
+**3. Estimating the Odds Ratio:**
 
   - Odds of Admission for Men:  
 
@@ -616,7 +616,7 @@ The degrees of freedom are calculated for both statistics as $df=(r-1)(c-1)$
   
     $\text{Odds}_{\text{Women}} = \frac{\text{Admitted Women}}{\text{Not Admitted Women}}$ 
     
-**Calculating Odds**: 
+**Calculating Odds:**
       
   $\text{OR} = \frac{\text{Odds}{\text{Men}}}{\text{Odds}{\text{Women}}}$  
 
@@ -630,9 +630,9 @@ $\ln(\text{OR}) \pm Z_{0.975} \times SE$
 
 However we still have to get the confidence interval for the odds ratio by exponentiating the bounds.
 
-#### 4. Estimating the Risk Ratio:
+**4. Estimating the Risk Ratio:**
 
-Calculating Risks (Probabilities)  
+Calculating Risks (Probabilities):
 
   - Risk of Admission for Men:  
 
@@ -642,7 +642,7 @@ Calculating Risks (Probabilities)
 
     $P_{\text{Women}} = \frac{\text{Admitted Women}}{\text{Total Women}}$  
 
-**Calculating Risk Ratio (RR)**
+**Calculating Risk Ratio (RR):**
 
 $\text{RR} = \frac{P_{\text{Men}}}{P_{\text{Women}}}$  
 
@@ -685,25 +685,25 @@ risk_ratio_result
 
 ### Results and Interpretation:
 
-1. Chi-Squared Test:
+**1. Chi-Squared Test:**
 
 ${\chi^2 = 92.205, p < 2.2e^{-16}}$
 
 The large chi-squared statistic and the small p-value indicate a significant association between gender and admission status. Therefore rejecting the null  hypothesis of independence.
 
-2. Likelihood Ratio Test:
+**2. Likelihood Ratio Test:**
 
 ${G^2 = 93.98, p < 0.001}$
 
 Similarly as the chi-squared test, the likelihood ratio test also indicates a significant association between gender and admission.
 
-3. Odds Ratio:
+**3. Odds Ratio:**
 
 ${\text{OR} = 1.841, 95\% \text{ CI } (1.624, 2.087)}$
 
 According to the odds ratio, men have 1.841 times higher odds of being admitted compared to women. The 95% confidence interval does not include 1, indicating a statistically significant difference in admission odds.
 
-4. Risk Ratio:
+**4. Risk Ratio:**
 
 ${\text{RR} = 1.467, 95\% \text{ CI } (1.353, 1.591)}$
 
@@ -892,17 +892,17 @@ print(lr_result)
 ```
 ### Results and Interpretation:
 
-1. Odds Ratio($\hat{\theta}$):
+**1. Odds Ratio($\hat{\theta}$):**
 
 Using the formula:
 
  - $\hat{\theta} = \frac{(500,000 \cdot 499,000)}{(500,500 \cdot 501,515)} \approx 0.995$
 
-2. Confidence Interval:
+**2. Confidence Interval:**
 
  - $[0.990, 0.999]$ 
 
-3. Statistical tests:
+**3. Statistical tests:**
 
   - Likelihood Ratio Test: $G^2 = 4.275, p = 0.0387$
   
