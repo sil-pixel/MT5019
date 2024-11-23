@@ -648,7 +648,7 @@ ${\ln(\text{RR}) \pm Z_{0.975} \times SE}$
 
 However we still have to get the confidence interval for the risk ratio by exponentiating the bounds.
 
-### Code
+### Output :
 
 ```{r echo=FALSE}
 # Perform chi-squared test
@@ -711,7 +711,7 @@ There is a statistically significant association between gender and admission st
 
 The approach is similar to the previous question. We will analyze what happens if we replace all numbers in the table with one tenth of their original values and perform the same analysis, which we will compare with the previous results.
 
-### Code:
+### Output :
 
 ```{r echo=FALSE}
 # Function to analyze data
@@ -844,7 +844,7 @@ $\text{Odds Ratio} (\hat{\theta}) = \frac{(a/c)}{(b/d)} = \frac{a \cdot d}{b \cd
 Where a,b,c,d are the cell counts in the 2x2 table. To achive the requirements we need  $\hat{\theta} \approx 1$ meaning that  $a/c \approx b/d$ or $a \cdot d \approx b \cdot c$.  To ensure  $\theta \neq 1$  we have to use a large sample size to narrow the confidence interval and exclude 1. Finally we have to calculate the confidence interval $\ln(\hat{\theta}) \pm Z_{0.975} \cdot \text{SE}$ and exponentiate the bounds to get the confidence interval for the odds ratio. 
 
 
-### Code:
+### Output :
 ```{r echo=FALSE}
 library(MASS)
 # Create the contingency table
