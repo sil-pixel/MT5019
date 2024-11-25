@@ -132,9 +132,9 @@ ${E_{ij} = \frac{\text{i-th Row Total} \times \text{j-th Column Total}}{\text{Gr
 
 #### 3. Pearson’s Chi-Squared Statistic:
 
-The formula for Pearson’s Chi-Squared Statistic (${\chi^2}$) is: 
+The formula for Pearson’s Chi-Squared Statistic (${X^2}$) is: 
 
-${\chi^2 = \sum_{i=1}^{r} \sum_{j=1}^{c} \frac{(O_{ij} - E_{ij})^2}{E_{ij}}}$
+${X^2 = \sum_{i=1}^{r} \sum_{j=1}^{c} \frac{(O_{ij} - E_{ij})^2}{E_{ij}}}$
 
 #### 4. Likelihood Ratio Statistic: 
 
@@ -175,7 +175,7 @@ For Men:
 
 Calculating the Pearson's Chi-Squared Test Statistic:  
 
-${\chi^2} = \frac{(309 - 285.45)^2}{285.45} + \frac{(191 - 214.55)^2}{214.55} + \frac{(319 - 342.55)^2}{342.55} + \frac{(281 - 257.45)^2}{257.45} =  1.94 + 2.58 + 1.62 + 2.15 = 8.29$
+${X^2} = \frac{(309 - 285.45)^2}{285.45} + \frac{(191 - 214.55)^2}{214.55} + \frac{(319 - 342.55)^2}{342.55} + \frac{(281 - 257.45)^2}{257.45} =  1.94 + 2.58 + 1.62 + 2.15 = 8.29$
 
 Calculating the Likelihood Ratio Test Statistic:
 
@@ -683,7 +683,7 @@ $E_{ij} = \frac{(\text{Row Total}_i) \times (\text{Column Total}_j)}{\text{Grand
 
 Calculating the Pearson's Chi-Squared Test Statistic:  
 
-$\chi^2 = \sum_{i=1}^{2} \sum_{j=1}^{2} \frac{(O_{ij} - E_{ij})^2}{E_{ij}}$  
+$X^2 = \sum_{i=1}^{2} \sum_{j=1}^{2} \frac{(O_{ij} - E_{ij})^2}{E_{ij}}$  
 
 Calculating the Likelihood Ratio Test Statistic:  
 
@@ -846,7 +846,7 @@ kable(
 
 **1. Chi-Squared Test:**
 
-${\chi^2 = 92.205, p < 2.2e^{-16}}$
+${X^2 = 92.205, p < 2.2e^{-16}}$
 
 The large chi-squared statistic and the small p-value indicate a significant association between gender and admission status. Therefore rejecting the null  hypothesis of independence.
 
@@ -918,7 +918,7 @@ list(
 
 #### 1. Chi-Squared Test and Likelihood Ratio Test:
 
-The Chi-Squared  $\chi^2$ and Likelihood Ratio $G^2$ statistics, as well as their associated p-values, measure the association between gender and admission. The results for the original, one-tenth, and one-hundredth tables are summarized below:
+The Chi-Squared  $X^2$ and Likelihood Ratio $G^2$ statistics, as well as their associated p-values, measure the association between gender and admission. The results for the original, one-tenth, and one-hundredth tables are summarized below:
 
 ```{r echo=FALSE}
 # Create the data frame for the table
@@ -990,7 +990,7 @@ The risk ratio across the three datasets shows a consistent value, varied only s
 
 ### Conclusion:
 
-This question helps us highlight the importance of a sufficiently large sample size for reliabale statistical inference. While relative measures such as odds and risk ratios remain relatively stable across different sample sizes, the precision of the estimates decreases as the sample size decreases. In addition, absolute measures such as $\chi^2$ and $G^2$ lose significance as the sample size decreases.
+This question helps us highlight the importance of a sufficiently large sample size for reliabale statistical inference. While relative measures such as odds and risk ratios remain relatively stable across different sample sizes, the precision of the estimates decreases as the sample size decreases. In addition, absolute measures such as $X^2$ and $G^2$ lose significance as the sample size decreases.
 
 ## Question 3:
 
@@ -1106,7 +1106,7 @@ Using the formula:
 
   - Likelihood Ratio Test: $G^2 = 4.275, p = 0.0387$
   
-  - Chi-Squared Test: $\chi^2 = 4.275, p = 0.0386$
+  - Chi-Squared Test: $X^2 = 4.275, p = 0.0386$
   
 ### Conclusion:
 

@@ -8,23 +8,160 @@ output: pdf_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(knitr)
 ```
 
 ---
 
-# Summary
-
 # Exercise 2:1
 
-## Approach : 
+This report analyses the data on periodontitis from a group of adult patients at a large dental clinic.
+The goal is to understand the influence of the parameter estimates between logistic regression models of the probability for periodontitis in the population as a function of dental floss use and the probability for using dental floss as a function of periodontitis status. 
 
-## Code :
+```{r echo=FALSE, fig.align='center'}
+
+# Create the 2x2 table
+periodontitis_table <- matrix(
+  c(22, 75, 148, 265, 97, 413, 170, 340, 510), # Data including margins
+  nrow = 3,                                   # Three rows: Yes, No, Sum
+  byrow = TRUE,                               # Fill matrix by rows
+  dimnames = list(
+    `Dental Floss Use` = c("Used Dental Floss", "Not Used Dental Floss", "Total"), # Row names
+    `Periodontitis` = c("Periodontitis", "No Periodontitis", "Total")    # Column names
+  )
+)
+
+# Convert to data frame for better printing
+periodontitis_df <- as.data.frame.matrix(periodontitis_table)
+
+# Use kable to display the table
+kable(
+  periodontitis_df,
+  caption = "Regular Use of Dental Floss and Periodontitis",
+  align = "c"
+)
+
+```
+
+## Question 1: Logistic regression model of the probability for periodontitis
+
+The logistic regression model of the probability for periodontitis in the population as a function of dental floss use is defined as:
+
+$\text{logit}(p_x) = \log\left(\frac{p_x}{1 - p_x}\right) = \beta_0 + \beta_1 x$
+
+where:
+
+- $x$ = 1 if dental floss is regularly used, $x$ = 0 otherwise.
+- $p_x$ = $P(\text{periodontitis} \mid x)$, the probability of periodontitis given $x$.
+- $\beta_0$: The log-odds of periodontitis when $x$ = 0 (no floss use).
+- $\beta_1$: The change in log-odds of periodontitis when $x$ changes from 0 to 1 (effect of using floss).
+	
+### Approach:
+
+Fit the logistic regression model to the data and interpret the parameter estimates.
+
+### Estimate Parameters:
+
+**1. Fit the logistic regression model:**
+
+The summary of the logistic regression model coefficients is presented below:
+
+```{r echo=FALSE}
+# Prepare data
+dental_data <- data.frame(
+  floss = c(1, 0), # 1 = yes, 0 = no
+  periodontitis_yes = c(22, 148),
+  periodontitis_no = c(75, 265)
+)
+
+# Logistic regression
+model <- glm(cbind(periodontitis_yes, periodontitis_no) ~ floss, 
+             family = binomial(link=logit), data = dental_data)
+
+# Extract model coefficients summary
+model_summary <- summary(model)
+
+# Create a data frame with relevant data
+coefficients_table <- data.frame(
+  Term = rownames(model_summary$coefficients),
+  Estimate = model_summary$coefficients[, "Estimate"],
+  `Std. Error` = model_summary$coefficients[, "Std. Error"],
+  `z value` = model_summary$coefficients[, "z value"],
+  `Pr(>|z|)` = model_summary$coefficients[, "Pr(>|z|)"]
+)
+
+# Print the table using kable
+kable(
+  coefficients_table,
+  caption = "Summary of Logistic Regression Model Coefficients",
+  align = c("l", "c", "c", "c", "c"),
+  col.names = c("Term", "Estimate", "Std. Error", "z value", "P-value")
+)
+```
+
+**2. Expected Estimates of the parameters:**
+
+2.1.	Intercept $(\beta_0)$:
+
+- $\beta_0$ represents the log-odds of periodontitis when $x$ = 0 (no dental floss use):
+    $\beta_0 = \log\left(\frac{p_0}{1 - p_0}\right)$ where:
+    $p_0 = \frac{\text{Periodontitis (No Floss)}}{\text{Total (No Floss)}} = \frac{148}{413} \approx 0.3585$
+
+- Hence: $\beta_0 \approx \log\left(\frac{0.3585}{1 - 0.3585}\right) = \log(0.558) \approx -0.583$
+
+2.2.	Slope $(\beta_1)$:
+
+- $\beta_1$ represents the change in log-odds when $x$ = 1 (dental floss is used):
+        $\beta_1 = \log\left(\frac{p_1}{1 - p_1}\right) - \log\left(\frac{p_0}{1 - p_0}\right)$ where:
+$p_1 = \frac{\text{Periodontitis (Floss)}}{\text{Total (Floss)}} = \frac{22}{97} \approx 0.2268$
+
+- Hence:
+      $\beta_1 \approx \log\left(\frac{0.2268}{1 - 0.2268}\right) - \log\left(\frac{0.3585}{1 - 0.3585}\right) \approx \log(0.293) - \log(0.558) = -1.229 + 0.583 = -0.646$
+
+The final logistic regression equation: $\text{logit}(p_x) = -0.583 - 0.646x$
+
+### Interpret Parameters:
+
+- 1.	$\beta_0$ = -0.583:
+  - The log-odds of periodontitis for individuals who do not use dental floss is approximately -0.583.
+  - The corresponding probability of periodontitis is: 
+  $p_0 = \frac{e^{-0.583}}{1 + e^{-0.583}} \approx 0.358$
+
+- 2.	$\beta_1$ = -0.646:
+  - The log-odds of periodontitis decreases by 0.646 when individuals use dental floss regularly.
+  - This corresponds to an odds ratio of:
+  $\text{Odds Ratio} = e^{\beta_1} = e^{-0.646} \approx 0.524$
+
+Individuals who use dental floss regularly have approximately 52.4% lower odds of developing periodontitis compared to those who do not.
+
+### Conclusion: 
+
+- The logistic regression model provides interpretable estimates of the effect of dental floss use on periodontitis.
+- Regular dental floss use is associated with a significant reduction in the odds of periodontitis.
+- The logistic regression model is appropriate because the data is binary (periodontitis: yes/no) and the explanatory variable (dental floss use) is categorical.
+
+## Question 2: Logistic regression model of the probability for using dental floss
+
+### Approach : 
+
+### R Output :
 
 ```{r echo=FALSE}
 
 ```
 
-## Output : 
+## Observation : 
+
+
+## Question 3: 
+
+### Approach : 
+
+### R Output :
+
+```{r echo=FALSE}
+
+```
 
 ## Observation : 
 
