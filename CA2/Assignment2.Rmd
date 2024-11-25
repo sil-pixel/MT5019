@@ -1,5 +1,6 @@
 ---
-title: "AssignmentII"
+title: "Assignment II"
+subtitle: "Logistic regression"
 author: "Silpa Soni Nallacheruvu (19980824-5287) Hernan Aldana (20000526-4999)"
 date: "`r Sys.Date()`"
 output: pdf_document
@@ -8,6 +9,8 @@ output: pdf_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+
+---
 
 # Summary
 
@@ -24,6 +27,8 @@ knitr::opts_chunk$set(echo = TRUE)
 ## Output : 
 
 ## Observation : 
+
+---
 
 # Exercise 2:2
 

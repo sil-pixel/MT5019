@@ -37,9 +37,7 @@ tab1 <- matrix(
 knitr::kable(
   tab1,
   caption = "Opinions on legal abortion"
-) %>%
-  kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed"))
-
+) 
 
 ```
 
@@ -592,8 +590,7 @@ tab2 <- matrix(
 knitr::kable(
   tab2,
   caption = "Summary Table"
-) %>%
-  kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed"))
+)
 ```
 
 ## Question 1:
@@ -656,8 +653,7 @@ knitr::kable(
   col.names = c("Gender", "% Admitted", "% Not Admitted"),
   caption = "Summary Table",
   align = c("l", "c", "c")
-) %>%
-  kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed"))
+)
 ```
 **2. Testing for Independence:**
 
@@ -882,10 +878,8 @@ There is a statistically significant association between gender and admission st
 
 The approach is similar to the previous question. We will analyze what happens if we replace all numbers in the table with one tenth of their original values and perform the same analysis, which we will compare with the previous results.
 
-### Output:
 
-
-```{r echo=FALSE}
+```{r echo=FALSE, eval=FALSE}
 # is the output necessary here? the results are already included in the tables
 # Function to analyze data
 analyze_table <- function(data) {
@@ -941,8 +935,7 @@ knitr::kable(
   col.names = c("Dataset", "X² Statistic", "G² Statistic", "p-value"),
   caption = "Summary of Chi-Squared and Likelihood Ratio Tests",
   align = c("l", "c", "c", "c")
-) %>%
-  kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed"))
+) 
 ```
 
 As it can be seen, both the Chi-Squared and Likelihood Ratio tests show a dramatic decrease as the table is scaled down, reflecting thus the reduced sample size.
@@ -966,8 +959,7 @@ knitr::kable(
   col.names = c("Dataset", "Odds Ratio (Women)", "95% Confidence Interval"),
   caption = "Odds Ratio for Women Across Datasets",
   align = c("l", "c", "c")
-) %>%
-  kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed"))
+)
 ```
 
 The odds ratio across the three datasets shows a consistent value, varied only slightly. The confidence interval, however, widens as the sample size decreases, reflecting the increased uncertainty in the estimate. So for the original dataset, the odds ratio is 1.841, with a 95% confidence interval of [1.624, 2.087], which is very narrow, reflecting high precision. On the other hand, for the one-hundredth dataset, the odds ratio is 1.733, with a 95% confidence interval of [0.507, 5.928], which is much wider, reflecting low precision.
@@ -990,8 +982,7 @@ knitr::kable(
   col.names = c("Dataset", "Risk Ratio (Women)", "95% Confidence Interval"),
   caption = "Risk Ratio for Women Across Datasets",
   align = c("l", "c", "c")
-) %>%
-  kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed"))
+) 
 ```
 
 
@@ -1036,8 +1027,7 @@ tab5 <- matrix(
 knitr::kable(
   tab5,
   caption = "Summary Table"
-) %>%
-  kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed"))
+) 
 
 # Convert to table
 tab_cont <- as.table(tab5)
