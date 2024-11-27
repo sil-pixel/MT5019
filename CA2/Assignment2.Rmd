@@ -174,7 +174,22 @@ Individuals who use dental floss regularly have approximately 52.4% lower odds o
 ## Code :
 
 ```{r echo=FALSE}
+# Data from the instructions
+log_dose <- c(-7.60, -6.22, -4.60, -3.00, -1.39, 0.92)
+tumor <- c(1, 2, 4, 9, 12, 32)
+no_tumor <- c(17, 17, 24, 23, 16, 8)
+total <- tumor + no_tumor
 
+# Create the table
+original_table <- data.frame(
+  `log(dose)` = log_dose,
+  Tumor = tumor,
+  `No tumor` = no_tumor,
+  `Total` = total
+)
+
+# Display the table
+knitr::kable(original_table, caption = "Original Data Table")
 ```
 
 ## Output : 
