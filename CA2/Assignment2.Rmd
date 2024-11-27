@@ -168,10 +168,9 @@ Individuals who use dental floss regularly have approximately 52.4% lower odds o
 ---
 
 # Exercise 2:2
+## Question 1:
 
-## Approach : 
-
-## Code :
+For this question we estimate for each dose separately the risk, odds, and log-odds of developing a tumor. Also plot the risk (probability) of developing a tumor as a function of the log dose. Calculate the log-odds of developing a tumor and plot it as a function of the log dose. 
 
 ```{r echo=FALSE}
 # Data from the instructions
@@ -187,12 +186,135 @@ original_table <- data.frame(
   `No tumor` = no_tumor,
   `Total` = total
 )
-
+t_table<- t(original_table)
 # Display the table
-knitr::kable(original_table, caption = "Original Data Table")
+knitr::kable(t_table, caption = "Original Data Table")
 ```
 
-## Output : 
+### Approach : 
+To answer these questions we have to calculate the following estimates for each dose level of the table:
 
-## Observation : 
+1. The risk of developing a tumor is calculated as:
+
+  $Risk = \frac{Number of Tumor}{Total Observations}$
+
+2. The odds of developing a tumor is calculated as:
+
+  $Odds = \frac{Risk}{1 - Risk}$
+
+3. The log-odds of developing a tumor is calculated as:
+
+  $\log(Odds) = \log(\frac{Risk}{1-Risk})$
+
+After we caclulate these estimates for each dose level, we  plot the risk (probability) of developing a tumor as a function of the log dose. We  also calculate the log-odds of developing a tumor and plot it as a function of the log dose.
+
+### Results
+
+```{r echo=FALSE}
+# Calculate risk (probability) of tumor
+risk <- tumor / total
+
+# Calculate odds
+odds <- risk / (1 - risk)
+
+# Calculate log-odds
+log_odds <- log(odds)
+
+updated_table <- data.frame(
+  `log(dose)` = log_dose,
+  Tumor = tumor,
+  `No tumor` = no_tumor,
+  Total = total,
+  Risk = round(risk, 4),
+  Odds = round(odds, 4),
+  `Log-Odds` = round(log_odds, 4)
+)
+t_updated_table<- t(updated_table)
+knitr::kable(t_updated_table, caption = "Original Data Table with Risk, Odds, and Log-Odds Calculations")
+
+```
+1. Data
+
+  - As we can observe from the updated table and from the given data, at lower doses of BaP, few mice develop tumors, while most do not. As the dose increases, the risk of developing a tumor also increases.
+
+2. Risk
+
+  - Risk represents the probability of developing a tumor, and for the given data it increases with $\log(dose)$. As for the calculated estimates, the risk is very low(0.0556) for the lowest dose of BaP(-7.60), indicating a small proportion of tumors.  At the highest dose (0.92) the risk is much higher(0.8), showing a significant increase in the development of tumors. 
+
+3. Odds
+
+  - Odds, which represent the ratio of tumor probability to no-tumor probability, increases expontentially with dose. The odds are very low(0.0588) for the lowest dose of BaP(-7.60), indicating a very low probability of developing a tumor. This means that tumors are 0.0588 as likely as no tumors. At the highest dose (0.92) the odds are much higher(4), showing a significant increase in the development of tumors. Meaning that tumors are four times more likely than no tumors at the given dose.
+  
+4. Log-Odds
+
+  - Log-Odds increase nearly linearly with log(dose), ranging from -2.8332 at the lowest dose to 1.3863 at the highest. The linearity in log-odds is imperative, as it supports the use of a logistic regression.
+  
+
+
+```{r echo=FALSE}
+
+# Create an updated table with the new calculations
+updated_table <- data.frame(
+  `log(dose)` = log_dose,
+  Tumor = tumor,
+  `No tumor` = no_tumor,
+  Total = total,
+  Risk = round(risk, 4),
+  Odds = round(odds, 4),
+  `Log-Odds` = round(log_odds, 4)
+)
+
+# Plot Risk (Probability) vs log(dose)
+plot(log_dose, risk, type = "b", col = "blue", pch = 19,
+     xlab = "log(Dose)", ylab = "Risk (Probability)",
+     main = "Risk vs log(Dose)")
+grid()
+```
+
+1. Risk vs log(dose) 
+
+  - The graph confirms a strong dose response relationship. As log(dose) increases, the probability of developing a tumor increases rapidly.
+  
+
+
+```{r echo=FALSE}
+# Plot Log-Odds vs log(dose)
+plot(log_dose, log_odds, type = "b", col = "red", pch = 19,
+     xlab = "log(Dose)", ylab = "Log-Odds",
+     main = "Log-Odds vs log(Dose)")
+grid()
+```
+
+2. Log-Odds vs log(dose)
+
+  - The graph shows a nearly linear relationship with log(dose) confirming that the data aligns well with the assumptions of logistic regression. 
+  
+### Conclusion
+
+The analysis confirms a strong dose response relationship between the dose of BaP and the probability of developing a tumor. As the dose or log(dose) increases, the risk and odds of tumor development also increase as shown in the "Risk vs. log(dose)" plot. The near linear relationship in the "Log-Odds vs. log(dose)" plot supports the use of logistic regression to model the data.
+
+```{r echo=FALSE}
+# Fit a logistic regression model
+model <- glm(cbind(tumor, no_tumor) ~ log_dose, family = binomial)
+
+# Summary of the model
+```
+
+```{r echo=FALSE}
+# Generate fitted values for plotting
+new_dose <- seq(min(log_dose), max(log_dose), length.out = 100)
+predicted_risk <- predict(model, newdata = data.frame(log_dose = new_dose), type = "response")
+
+# Add fitted curve to the risk plot
+plot(log_dose, risk, type = "b", col = "blue", pch = 19,
+     xlab = "log(Dose)", ylab = "Risk (Probability)",
+     main = "Risk vs log(Dose) with Logistic Fit")
+lines(new_dose, predicted_risk, col = "darkgreen", lwd = 2, lty = 2)
+legend("topleft", legend = c("Observed Risk", "Fitted Logistic Curve"),
+       col = c("blue", "darkgreen"), lty = c(1, 2), lwd = c(1, 2), pch = c(19, NA))
+```
+
+### Output : 
+
+### Observation : 
 
