@@ -3,6 +3,15 @@ library("ggplot2")
 library("dplyr")
 
 
+
+
+logdos<-c(-7.60,-6.22,-4.60,-3.00,-1.39,0.92)
+n<-c(18,19,28,32,28,40)
+x<-c(1,2,4,9,12,32)
+data22 <- data.frame(logdos,x,n)
+data22
+
+
 # Data
 log_dose <- c(-7.60, -6.22, -4.60, -3.00, -1.39, 0.92)
 tumor_count <- c(1, 2, 4, 9, 12, 32)
