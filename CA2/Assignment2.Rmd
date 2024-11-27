@@ -293,11 +293,32 @@ grid()
 
 The analysis confirms a strong dose response relationship between the dose of BaP and the probability of developing a tumor. As the dose or log(dose) increases, the risk and odds of tumor development also increase as shown in the "Risk vs. log(dose)" plot. The near linear relationship in the "Log-Odds vs. log(dose)" plot supports the use of logistic regression to model the data.
 
+
+## Question 2
+
+Fit a logistic regression model to the data and interpret the parameter estimates, particularly the slope parameter.
+
+### Approach :
+
+To answer this question, we fit a logistic regression model where the probability of developing a tumor($P$) is modeled as:
+
+$\text{logit}(P) = \log\left(\frac{P}{1 - P}\right) = \beta_0 + \beta_1 \times \text{log(dose})$
+
+where:
+  
+  - $\beta_{0}$ is the intercept, which represents the log-odds of developing a tumor when the dose is zero.
+  
+  - $\beta_{1}$ is the slope parameter, which represents the change in log-odds of developing a tumor for a one-unit increase in the log dose.
+
+We will use the logistic regression model to estimate this parameters.
+### Results :
+
 ```{r echo=FALSE}
 # Fit a logistic regression model
 model <- glm(cbind(tumor, no_tumor) ~ log_dose, family = binomial)
 
 # Summary of the model
+summary(model)
 ```
 
 ```{r echo=FALSE}
@@ -312,9 +333,30 @@ plot(log_dose, risk, type = "b", col = "blue", pch = 19,
 lines(new_dose, predicted_risk, col = "darkgreen", lwd = 2, lty = 2)
 legend("topleft", legend = c("Observed Risk", "Fitted Logistic Curve"),
        col = c("blue", "darkgreen"), lty = c(1, 2), lwd = c(1, 2), pch = c(19, NA))
+grid()
 ```
+1. Intercept $\beta_0$
 
-### Output : 
+According to the summary of the model, the intercept $\beta_{0}$ is 0.687. This represent the log-odds of developing a tumor when the dose is zero. Its corresponding odd are $e^{0.687} = 1.99$. This means that the odds of developing a tumor are nearly twice as high as the odds of not developing a tumor when the log(dose) is zero.
 
-### Observation : 
+Translating this to probabilities, the probability of developing a tumor is $P = \frac{e^{0.687}}{1 + e^{0.687}} = 0.665$. This means that the probability of developing a tumor is 66.5% when the dose is zero.
 
+2. Slope $\beta_1$
+
+The slope parameter $\beta_{1}$ is 0.52037. This quantifies the change in the log-odds of developing a tumor for a one-unit increase in log(dose). A positive slope indicates that higher doses increase the odds of developing a tumor. the odds ario is $e^{0.52037}\approx1.683$
+
+This means that for each one-unit increase in log(dose), the odds of developing a tumor increases by approximately 68.3%
+
+
+### Conclusion :
+
+In conclusion, the logistic regression model reveals a clear relationship between log(dose) and the probability of developing a tumor. The intercept $\beta_{0}$ represents the log-odds of developing a tumor when the log(dose) is zero, while the slope $\beta_{1}$ quantifies the change in log-odds for a one-unit increase in log(dose). The positive slope indicates that higher doses increase the odds of developing a tumor. The fitted logistic curve aligns well with the observed risk, confirming the appropriateness of the logistic regression model.
+
+## Question 3
+
+
+### Approach :
+
+### Results :
+
+### Conclusion :
