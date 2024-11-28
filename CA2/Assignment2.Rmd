@@ -399,6 +399,7 @@ where:
   - $\beta_{1}$ is the slope parameter, which represents the change in log-odds of developing a tumor for a one-unit increase in the log dose.
 
 We will use the logistic regression model to estimate this parameters.
+
 ### Results :
 
 ```{r echo=FALSE}
@@ -468,7 +469,7 @@ Find the covariance matrix for the estimates and assess if they are correlated. 
   
   we calculate the predicted probability $P$ at $\log(dose = -1.39$
   
-  To find the confidence interval for $P$, we:
+  - To find the confidence interval for $P$, we:
   
     - Calculate the standard error of $logit(P)$.
     
@@ -505,11 +506,12 @@ p_ci <- exp(logit_p_ci) / (1 + exp(logit_p_ci))
 list(predicted_risk = p, confidence_interval = p_ci)
 
 ```
+
 1. Covariance Matrix and Correlation
   
   I. Covariance Matriz
   
-    - The covariance matrix for the estimates $\beta_0$ and $\beta_1$ is:
+  - The covariance matrix for the estimates $\beta_0$ and $\beta_1$ is:
     
       - Variance of $\beta_0$: 0.06633.
       
@@ -521,21 +523,21 @@ list(predicted_risk = p, confidence_interval = p_ci)
     
   II. Correlation:
   
-    - The correlation between $\beta_0$ and $\beta_1$ is 0.655 aproximately, indicating a moderate positive correlation between the intercept and slope parameters.
+  - The correlation between $\beta_0$ and $\beta_1$ is 0.655 approximately, indicating a moderate positive correlation between the intercept and slope parameters.
   
 2. Confidence Intervals for Parameters
 
-  I. Confidence Interval for $\beta_0$:
+  - Confidence Interval for $\beta_0$:
   
     - The 95% confidence interval for $\beta_0$ is approximately [0.198, 1.213].
     
-    - This means that the log-odds of developing a tumor at log(dose)=0 is likely within this range with 95% condifence.
+    - This means that the log-odds of developing a tumor at log(dose)=0 is likely within this range with 95% confidence.
     
-  II. Confidence Interval for $\beta_1$: 
+  - Confidence Interval for $\beta_1$: 
   
     - The 95% confidence interval for $\beta_1$ is approximately [0.363, 0.699].
     
-    - This means that eaach one unit increase in log(dose) increases thelog-odds of developing a tumor by aproximately 0.363 to 0.699 with 95% confidence.
+    - This means that each one unit increase in log(dose) increases the log-odds of developing a tumor by approximately 0.363 to 0.699 with 95% confidence.
     
 3. Predict Risk and Confidence Interval for P at a dose of 0.25 or log(dose) = -1.39
   
@@ -551,8 +553,142 @@ list(predicted_risk = p, confidence_interval = p_ci)
 
 ## Question 4
 
+Perform a Wald-test of $H_0 : \beta_1 = 0$. Explain and show, with your own calculations based on R-output, how the test statistic is constructed. Interpret the result from the hypothesis test.
+
 ### Approach :
+
+1. Wald test:
+
+  - The wald test evaluates whether the slope of the parameter ($\beta_1$) is singificanlty different from zero.
+  
+  - The null hypothesis is $H_0 : \beta_1 = 0$, meaning that the dose log(dose) has no effect on the probability of developing a tumor.
+  
+  - The alternative hypothesis is $H_1 : \beta_1 \neq 0$, indicating that the dose log(dose) has a significant effect on the probability of developing a tumor.
+  
+2. Test Statistic:
+
+  - The Wald test statistic is computed as:
+  
+  $W = \frac{\hat{\beta_1}}{\text{SE}(\hat{\beta_1})}$
+  
+  - Under the null hypothesis, $W$ follows a standard normal distribution.
+  
+3. P-value:
+
+  - The p-value is calculated as:
+  
+  $P = 2 \times P(Z > |w|)$
+  
+### Results :
+
+```{r echo=FALSE}
+
+# Extract the estimate and standard error for beta_1
+beta1 <- coef(model)[2]
+se_beta1 <- sqrt(cov_matrix[2, 2])
+
+# Wald test statistic
+wald_statistic <- beta1 / se_beta1
+cat("Wald Statistic: ", wald_statistic)
+
+# P-value
+p_value <- 2 * (1 - pnorm(abs(wald_statistic)))
+cat("\nP-Value: ", p_value)
+
+```
+
+
+
+1. Significance of the Slope $\beta_1$
+
+  - A large Wald statistic $W = 6.12$ means that the effect of the log(dose) on tumor probability is highly significant.
+
+  - The p-value is very small (p<0.001) indicating concise evidence against the null hypothesis.
+  
+  - This means that the slope parameter $\beta-1$ is significantly different from zero, indicating that log(dose) has a significant effect on the probability of developing a tumor.
+
+
+### Conclusion :
+
+In conclusion, the Wald test shows that the slope parameter, $\beta_1$, is significantly different from zero. This indicates that $\log(\text{dose})$ has a statistically significant effect on the probability of developing a tumor. The extremely small p-value provides strong evidence against the null hypothesis ($H_0: \beta_1 = 0$). This confirms that the logistic regression model is appropriate for the data and that $\log(\text{dose})$ is a significant predictor of tumor probability.
+
+
+## Question 5
+
+Investigate the effect of sample size on the variance of parameter estimates by multiplying all counts in the table by 10, 100 and 1000. Report what you observe.
+
+### Approach :
+
+The variance of parameter estimates is generally inversely proportional to the sample size. As the sample size increases, the variance of the estimates decreases.
+
+To investigate the effect of sample size on the variance of parameter estimates we:
+
+  - Multiply all counts in the table by 10, 100, and 1000. 
+  
+  - Refit the logistic regression model to each new dataset.
+  
+  - Extract and compare the variances (diagonal elements of the covariance matrix) for $\beta_0$ and $\beta_1$.
 
 ### Results :
 
+```{r echo=FALSE}
+# Function to multiply counts and refit the model
+fit_scaled_model <- function(scale) {
+  scaled_tumor <- tumor * scale
+  scaled_no_tumor <- no_tumor * scale
+  scaled_total <- scaled_tumor + scaled_no_tumor
+  model <- glm(cbind(scaled_tumor, scaled_no_tumor) ~ log_dose, family = binomial)
+  variances <- diag(vcov(model))  # Extract variances of beta_0 and beta_1
+  list(model = model, variances = variances)
+}
+
+# Fit models for scales of 10, 100, and 1000
+scales <- c(10, 100, 1000)
+results <- lapply(scales, fit_scaled_model)
+
+# Extract variances for beta_0 and beta_1
+variances <- sapply(results, function(res) res$variances)
+rownames(variances) <- c("Variance (Intercept)", "Variance (log_dose)")
+colnames(variances) <- paste0("Scale_", scales)
+
+# Display the variances
+variances
+```
+
+1. Variance of the intercept $\beta_0$:
+
+  - Scale 10: $0.0066333693$
+  
+  - Scale 100: $6.633369 \times 10^{-4} $
+  
+  - Scale 1000: $6.633369 \times 10^{-5}$
+  
+2. Variance of the Slope ($\beta_1$):
+
+  - Scale 10: $0.0007229093$
+  
+  - Scale 100: $7.229093 \times 10^{-5}$
+  
+  - Scale 1000: $7.229093 \times 10^{-6}$
+  
+3. Interpretation:
+
+  - As the sample increases, the variances of both $\beta_0$ and $\beta_1$ decrease proportionally. This supports
+  
+  $\text{Variance} \propto \frac{1}{\text{Sample Size}}$
+  
+  - The variances decrease by a factor of 10, 100 and 100 as the counts are scaled, showing that larger samples sizes result in more precise estimates.
+  
+  
+  
 ### Conclusion :
+  
+As expected, increasing the sample size reduces the variances of the parameter estimates. This demonstrates the inverse relationship between sample size and variance, confirming that larger datasets provide more precise estimates. Both the intercept $\beta_0$ and slope $\beta_1$ benefit from increased precision with larger sample sizes. So the statement of the question is TRUE.
+  
+  
+  
+  
+  
+  
+  
+  
