@@ -45,7 +45,7 @@ kable(
 
 ## Question 1: Logistic regression model of the probability for periodontitis
 
-The logistic regression model of the probability for periodontitis in the population as a function of dental floss use is defined as:
+The logistic regression model of the probability for periodontitis in the population as a function of dental floss use, say Model A is defined as:
 
 $\text{logit}(p_x) = \log\left(\frac{p_x}{1 - p_x}\right) = \beta_0 + \beta_1 x$
 
@@ -58,13 +58,13 @@ where:
 	
 ### Approach:
 
-Fit the logistic regression model to the data and interpret the parameter estimates.
+Fit the logistic regression model A to the data and interpret the parameter estimates $\beta_0$ and $\beta_1$.
 
 ### Estimate Parameters:
 
-**1. Fit the logistic regression model:**
+**Fit the logistic regression model:**
 
-The summary of the logistic regression model coefficients is presented below:
+The summary of the coefficients of the logistic regression model A is presented below:
 
 ```{r echo=FALSE}
 # Prepare data
@@ -93,79 +93,167 @@ coefficients_table <- data.frame(
 # Print the table using kable
 kable(
   coefficients_table,
-  caption = "Summary of Logistic Regression Model Coefficients",
+  caption = "Summary of Logistic Regression Model A Coefficients",
   align = c("l", "c", "c", "c", "c"),
   col.names = c("Term", "Estimate", "Std. Error", "z value", "P-value")
 )
 ```
 
-**2. Expected Estimates of the parameters:**
-
-2.1.	Intercept $(\beta_0)$:
-
-- $\beta_0$ represents the log-odds of periodontitis when $x$ = 0 (no dental floss use):
-    $\beta_0 = \log\left(\frac{p_0}{1 - p_0}\right)$ where:
-    $p_0 = \frac{\text{Periodontitis (No Floss)}}{\text{Total (No Floss)}} = \frac{148}{413} \approx 0.3585$
-
-- Hence: $\beta_0 \approx \log\left(\frac{0.3585}{1 - 0.3585}\right) = \log(0.558) \approx -0.583$
-
-2.2.	Slope $(\beta_1)$:
-
-- $\beta_1$ represents the change in log-odds when $x$ = 1 (dental floss is used):
-        $\beta_1 = \log\left(\frac{p_1}{1 - p_1}\right) - \log\left(\frac{p_0}{1 - p_0}\right)$ where:
-$p_1 = \frac{\text{Periodontitis (Floss)}}{\text{Total (Floss)}} = \frac{22}{97} \approx 0.2268$
-
-- Hence:
-      $\beta_1 \approx \log\left(\frac{0.2268}{1 - 0.2268}\right) - \log\left(\frac{0.3585}{1 - 0.3585}\right) \approx \log(0.293) - \log(0.558) = -1.229 + 0.583 = -0.646$
-
-The final logistic regression equation: $\text{logit}(p_x) = -0.583 - 0.646x$
+The final logistic regression equation: $\text{logit}(p_x) = -0.582 - 0.644x$
 
 ### Interpret Parameters:
 
-- 1.	$\beta_0$ = -0.583:
-  - The log-odds of periodontitis for individuals who do not use dental floss is approximately -0.583.
+- 1.	$\beta_0$ = -0.582:
+  - The log-odds of periodontitis for individuals who do not use dental floss is approximately -0.582.
   - The corresponding probability of periodontitis is: 
-  $p_0 = \frac{e^{-0.583}}{1 + e^{-0.583}} \approx 0.358$
+  $p_0 = \frac{e^{-0.582}}{1 + e^{-0.582}} \approx 0.358$
 
-- 2.	$\beta_1$ = -0.646:
-  - The log-odds of periodontitis decreases by 0.646 when individuals use dental floss regularly.
+- 2.	$\beta_1$ = -0.644:
+  - The log-odds of periodontitis decreases by 0.644 when individuals use dental floss regularly.
   - This corresponds to an odds ratio of:
-  $\text{Odds Ratio} = e^{\beta_1} = e^{-0.646} \approx 0.524$
+  $\text{Odds Ratio} = e^{\beta_1} = e^{-0.644} \approx 0.525$
 
-Individuals who use dental floss regularly have approximately 52.4% lower odds of developing periodontitis compared to those who do not.
+Individuals who use dental floss regularly have approximately 52.5% lower odds of developing periodontitis compared to those who do not.
+
+### Conclusion: 
+
+- The logistic regression model A provides interpretable estimates of the effect of dental floss use on periodontitis.
+- Regular dental floss use is associated with a significant reduction in the odds of periodontitis.
+- The logistic regression model A is appropriate because the data is binary (periodontitis: yes/no) and the explanatory variable (dental floss use) is categorical.
+
+## Question 2: Logistic regression model of the probability for using dental floss
+
+The logistic regression model of the probability for using dental floss as a function of periodontitis status, say Model B is defined as:
+
+$\text{logit}(p_y) = \log\left(\frac{p_y}{1 - p_y}\right) = \gamma_0 + \gamma_1 y$
+
+where:
+
+- $y$ = 1 if periodontitis is present, $y$ = 0 otherwise.
+- $p_y$ = $P(\text{using dental floss} \mid y)$, the probability of using dental floss given $y$.
+- $\gamma_0$: The log-odds of using dental floss when  $y$ = 0  (i.e., when periodontitis is absent).
+- $\gamma_1$: The change in log-odds of using dental floss associated with the presence of periodontitis ( $y$ = 1 ).
+	
+### Approach:
+
+Fit the logistic regression model B to the data and interpret the parameter estimates $\gamma_0$ and $\gamma_1$
+
+### Estimate Parameters:
+
+**Fit the logistic regression model:**
+
+The summary of the coefficients of the logistic regression model B is presented below:
+
+```{r echo=FALSE}
+# Prepare data
+periodontitis_data <- data.frame(
+  periodontitis = c(1, 0), # 1 = yes, 0 = no
+  floss_yes = c(22, 75),
+  floss_no = c(148, 265)
+)
+
+# Logistic regression
+model_periodontitis <- glm(cbind(floss_yes, floss_no) ~ periodontitis, 
+             family = binomial(link=logit), data = periodontitis_data)
+
+# Extract model coefficients summary
+model_periodontitis_summary <- summary(model_periodontitis)
+
+# Create a data frame with relevant data
+coefficients_table2 <- data.frame(
+  Term = rownames(model_periodontitis_summary$coefficients),
+  Estimate = model_periodontitis_summary$coefficients[, "Estimate"],
+  `Std. Error` = model_periodontitis_summary$coefficients[, "Std. Error"],
+  `z value` = model_periodontitis_summary$coefficients[, "z value"],
+  `Pr(>|z|)` = model_periodontitis_summary$coefficients[, "Pr(>|z|)"]
+)
+
+# Print the table using kable
+kable(
+  coefficients_table2,
+  caption = "Summary of Logistic Regression Model B Coefficients",
+  align = c("l", "c", "c", "c", "c"),
+  col.names = c("Term", "Estimate", "Std. Error", "z value", "P-value")
+)
+```
+
+The final logistic regression equation: $\text{logit}(p_y) = -1.262 - 0.644y$
+
+### Interpret Parameters:
+
+- 1.	$\gamma_0$ = -1.262:
+  - The log-odds of using dental floss when periodontitis is absent is approximately -1.262
+  - The corresponding probability of periodontitis is: 
+  $p_0 = \frac{e^{-1.262}}{1 + e^{-1.262}} \approx 0.2205$
+  - This means approximately 22% of people without periodontitis use dental floss.
+
+- 2.	$\gamma_1$ = -0.644:
+  - The log-odds of using dental floss decreases by 0.644 when periodontitis is present.
+  - This corresponds to an odds ratio of:
+  $\text{Odds Ratio} = e^{\gamma_1} = e^{-0.644} \approx 0.525$
+
+The odds of individuals with periodontitis using dental floss are approximately 52.4% lower compared to not using dental floss.
 
 ### Conclusion: 
 
 - The logistic regression model provides interpretable estimates of the effect of dental floss use on periodontitis.
-- Regular dental floss use is associated with a significant reduction in the odds of periodontitis.
-- The logistic regression model is appropriate because the data is binary (periodontitis: yes/no) and the explanatory variable (dental floss use) is categorical.
-
-## Question 2: Logistic regression model of the probability for using dental floss
-
-### Approach : 
-
-### R Output :
-
-```{r echo=FALSE}
-
-```
-
-## Observation : 
+- The presence of periodontitis is associated with a significant reduction in the odds of regular dental floss.
+- The logistic regression model B is appropriate because the data is binary (Dental Floss use: yes/no) and the explanatory variable (presence of periodontitis) is categorical.
 
 
 ## Question 3: 
 
 ### Approach : 
 
-### R Output :
+**1. Expected Estimates of the parameters of Model A:**
 
-```{r echo=FALSE}
+1.1.	Intercept $(\beta_0)$:
 
-```
+- $\beta_0$ represents the log-odds of periodontitis when $x$ = 0 (no dental floss use):
+    $\beta_0 = \log\left(\frac{p_0}{1 - p_0}\right)$ where:
+    $p_0 = \frac{\text{Periodontitis (No Floss)}}{\text{Total (No Floss)}} = \frac{148}{413} \approx 0.3585$
+
+- Hence: $\beta_0 \approx \log\left(\frac{0.3585}{1 - 0.3585}\right) = \log(0.558) \approx -0.582$
+
+1.2.	Slope $(\beta_1)$:
+
+- $\beta_1$ represents the change in log-odds when $x$ = 1 (dental floss is used):
+        $\beta_1 = \log\left(\frac{p_1}{1 - p_1}\right) - \log\left(\frac{p_0}{1 - p_0}\right)$ where:
+$p_1 = \frac{\text{Periodontitis (Floss)}}{\text{Total (Floss)}} = \frac{22}{97} \approx 0.2268$
+
+- Hence:
+      $\beta_1 \approx \log\left(\frac{0.2268}{1 - 0.2268}\right) - \log\left(\frac{0.3585}{1 - 0.3585}\right) \approx \log(0.293) - \log(0.558) = -1.226 + 0.582 = -0.644$
+
+
+**2. Expected Estimates of the parameters of Model B:**
+
+2.1.	Intercept $(\gamma_0)$:
+
+- $\gamma_0$ represents the log-odds of using dental floss when $y$ = 0 (periodontitis is absent):
+    $\gamma_0 = \log\left(\frac{p_0}{1 - p_0}\right)$ where:
+    $p_0 = \frac{\text{Using Floss (No Periodontitis)}}{\text{Total (No Periodontitis)}} = \frac{75}{340} \approx 0.2205$
+
+- Hence: $\gamma_0 \approx \log\left(\frac{0.2205}{1 - 0.2205}\right) = \log(0.282) \approx -1.262$ 
+
+
+2.2.	Slope $(\gamma_1)$:
+
+- $\gamma_1$ represents the change in log-odds of using dental floss when $y$ = 1 (periodontitis is present):
+        $\gamma_1 = \log\left(\frac{p_1}{1 - p_1}\right) - \log\left(\frac{p_0}{1 - p_0}\right)$ where:
+$p_1 = \frac{\text{Using Floss (Periodontitis)}}{\text{Total (Periodontitis)}} = \frac{22}{170} \approx 0.1294$
+
+- Hence:
+      $\gamma_1 \approx \log\left(\frac{0.1294}{1 - 0.1294}\right) - \log\left(\frac{0.2205}{1 - 0.2205}\right) \approx \log(0.149) - \log(0.282) = -1.906 + 1.262 = -0.644$
+
 
 ## Observation : 
 
+- The expected estimates of the parameters of Model A and Model B are consistent with the actual estimates obtained from the logistic regression models.
+- The intercepts $\beta_1$ and $\gamma_1$ are the same, indicating that the log-odds of periodontitis and dental floss use are similar when the other variable is absent.
+
 ---
+
+\newpage
 
 # Exercise 2:2
 ## Question 1:
