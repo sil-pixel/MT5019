@@ -659,7 +659,7 @@ variances
 
   - Scale 10: $0.0066333693$
   
-  - Scale 100: $6.633369 \times 10^{-4} $
+  - Scale 100: $6.633369 \times 10^{-4}$
   
   - Scale 1000: $6.633369 \times 10^{-5}$
   
@@ -678,8 +678,6 @@ variances
   $\text{Variance} \propto \frac{1}{\text{Sample Size}}$
   
   - The variances decrease by a factor of 10, 100 and 100 as the counts are scaled, showing that larger samples sizes result in more precise estimates.
-  
-  
   
 ### Conclusion :
   
