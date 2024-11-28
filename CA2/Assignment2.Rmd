@@ -16,7 +16,7 @@ library(knitr)
 # Exercise 2:1
 
 This report analyses the data on periodontitis from a group of adult patients at a large dental clinic.
-The goal is to understand the influence of the parameter estimates between logistic regression models of the probability for periodontitis in the population as a function of dental floss use and the probability for using dental floss as a function of periodontitis status. 
+The goal is to understand the influence of the parameter estimates in logistic regression models of the probability for periodontitis on the population as a function of dental floss use and the probability for using dental floss as a function of periodontitis status. 
 
 ```{r echo=FALSE, fig.align='center'}
 
@@ -45,9 +45,9 @@ kable(
 
 ## Question 1: Logistic regression model of the probability for periodontitis
 
-The logistic regression model of the probability for periodontitis in the population as a function of dental floss use, say Model A is defined as:
+The logistic regression model,say Model A of the probability for periodontitis in the population as a function of dental floss use is defined as:
 
-$\text{logit}(p_x) = \log\left(\frac{p_x}{1 - p_x}\right) = \beta_0 + \beta_1 x$
+$\text{Model A} : \text{logit}(p_x) = \log\left(\frac{p_x}{1 - p_x}\right) = \beta_0 + \beta_1 x$
 
 where:
 
@@ -75,38 +75,44 @@ dental_data <- data.frame(
 )
 
 # Logistic regression
-model <- glm(cbind(periodontitis_yes, periodontitis_no) ~ floss, 
+model_floss <- glm(cbind(periodontitis_yes, periodontitis_no) ~ floss, 
              family = binomial(link=logit), data = dental_data)
 
 # Extract model coefficients summary
-model_summary <- summary(model)
+model_floss_summary <- summary(model_floss)
 
 # Create a data frame with relevant data
-coefficients_table <- data.frame(
-  Term = rownames(model_summary$coefficients),
-  Estimate = model_summary$coefficients[, "Estimate"],
-  `Std. Error` = model_summary$coefficients[, "Std. Error"],
-  `z value` = model_summary$coefficients[, "z value"],
-  `Pr(>|z|)` = model_summary$coefficients[, "Pr(>|z|)"]
+floss_coefficients_table <- data.frame(
+  Term = rownames(model_floss_summary$coefficients),
+  Estimate = model_floss_summary$coefficients[, "Estimate"],
+  `Std. Error` = model_floss_summary$coefficients[, "Std. Error"],
+  `z value` = model_floss_summary$coefficients[, "z value"],
+  `Pr(>|z|)` = model_floss_summary$coefficients[, "Pr(>|z|)"]
 )
 
 # Print the table using kable
 kable(
-  coefficients_table,
+  floss_coefficients_table,
   caption = "Summary of Logistic Regression Model A Coefficients",
   align = c("l", "c", "c", "c", "c"),
   col.names = c("Term", "Estimate", "Std. Error", "z value", "P-value")
 )
+
+#print the AIC score
+model_floss_aic <- AIC(model_floss)
+print(paste("AIC of Model A:", model_floss_aic))
 ```
 
 The final logistic regression equation: $\text{logit}(p_x) = -0.582 - 0.644x$
 
-### Interpret Parameters:
+### Interpret the Estimates:
 
 - 1.	$\beta_0$ = -0.582:
   - The log-odds of periodontitis for individuals who do not use dental floss is approximately -0.582.
   - The corresponding probability of periodontitis is: 
   $p_0 = \frac{e^{-0.582}}{1 + e^{-0.582}} \approx 0.358$
+  
+Individuals who do not use dental floss have a probability of approximately 35.8% of developing periodontitis compared to those who do.
 
 - 2.	$\beta_1$ = -0.644:
   - The log-odds of periodontitis decreases by 0.644 when individuals use dental floss regularly.
@@ -117,13 +123,12 @@ Individuals who use dental floss regularly have approximately 52.5% lower odds o
 
 ### Conclusion: 
 
-- The logistic regression model A provides interpretable estimates of the effect of dental floss use on periodontitis.
 - Regular dental floss use is associated with a significant reduction in the odds of periodontitis.
-- The logistic regression model A is appropriate because the data is binary (periodontitis: yes/no) and the explanatory variable (dental floss use) is categorical.
+- The logistic regression model A is accurate because the binary data (periodontitis: yes/no) and the categorical explanatory variable (dental floss use) provide estimates that can be used to interpret the effect of dental floss use on periodontitis.
 
 ## Question 2: Logistic regression model of the probability for using dental floss
 
-The logistic regression model of the probability for using dental floss as a function of periodontitis status, say Model B is defined as:
+The logistic regression model, say Model B, of the probability for using dental floss as a function of periodontitis status is defined as:
 
 $\text{logit}(p_y) = \log\left(\frac{p_y}{1 - p_y}\right) = \gamma_0 + \gamma_1 y$
 
@@ -172,20 +177,25 @@ coefficients_table2 <- data.frame(
 kable(
   coefficients_table2,
   caption = "Summary of Logistic Regression Model B Coefficients",
-  align = c("l", "c", "c", "c", "c"),
+  align = c("l", "c", "c", "c", "c", "c"),
   col.names = c("Term", "Estimate", "Std. Error", "z value", "P-value")
 )
+
+#print the AIC score
+model_aic <- AIC(model_periodontitis)
+print(paste("AIC of Model B:", model_aic))
 ```
 
 The final logistic regression equation: $\text{logit}(p_y) = -1.262 - 0.644y$
 
-### Interpret Parameters:
+### Interpret the Estimates:
 
 - 1.	$\gamma_0$ = -1.262:
   - The log-odds of using dental floss when periodontitis is absent is approximately -1.262
-  - The corresponding probability of periodontitis is: 
+  - The corresponding probability of using dental floss is: 
   $p_0 = \frac{e^{-1.262}}{1 + e^{-1.262}} \approx 0.2205$
-  - This means approximately 22% of people without periodontitis use dental floss.
+
+Individuals without periodontitis have a probability of approximately 22.05% of using dental floss compared to those who do not.
 
 - 2.	$\gamma_1$ = -0.644:
   - The log-odds of using dental floss decreases by 0.644 when periodontitis is present.
@@ -196,12 +206,13 @@ The odds of individuals with periodontitis using dental floss are approximately 
 
 ### Conclusion: 
 
-- The logistic regression model provides interpretable estimates of the effect of dental floss use on periodontitis.
-- The presence of periodontitis is associated with a significant reduction in the odds of regular dental floss.
-- The logistic regression model B is appropriate because the data is binary (Dental Floss use: yes/no) and the explanatory variable (presence of periodontitis) is categorical.
+- The presence of periodontitis is associated with a significant reduction in the odds of regular dental floss use.
+- The logistic regression model B is accurate because the binary data (Dental Floss use: yes/no) and the categorical explanatory variable (presence of periodontitis) provide estimates that can be used to interpret the presence of periodontitis on regular dental floss use. 
 
 
 ## Question 3: 
+
+Compare the estimates of the parameters of Model A and Model B with the values derived using the definitive formulas of the log odds and probabilities.
 
 ### Approach : 
 
@@ -210,16 +221,20 @@ The odds of individuals with periodontitis using dental floss are approximately 
 1.1.	Intercept $(\beta_0)$:
 
 - $\beta_0$ represents the log-odds of periodontitis when $x$ = 0 (no dental floss use):
+
     $\beta_0 = \log\left(\frac{p_0}{1 - p_0}\right)$ where:
-    $p_0 = \frac{\text{Periodontitis (No Floss)}}{\text{Total (No Floss)}} = \frac{148}{413} \approx 0.3585$
+    
+    $p_0 = P(\text{periodontitis} \mid x=0) = \frac{\text{Periodontitis (No Floss)}}{\text{Total (No Floss)}} = \frac{148}{413} \approx 0.3585$
 
 - Hence: $\beta_0 \approx \log\left(\frac{0.3585}{1 - 0.3585}\right) = \log(0.558) \approx -0.582$
 
 1.2.	Slope $(\beta_1)$:
 
 - $\beta_1$ represents the change in log-odds when $x$ = 1 (dental floss is used):
-        $\beta_1 = \log\left(\frac{p_1}{1 - p_1}\right) - \log\left(\frac{p_0}{1 - p_0}\right)$ where:
-$p_1 = \frac{\text{Periodontitis (Floss)}}{\text{Total (Floss)}} = \frac{22}{97} \approx 0.2268$
+
+    $\beta_1 = \log\left(\frac{p_1}{1 - p_1}\right) - \log\left(\frac{p_0}{1 - p_0}\right)$ where:
+        
+    $p_1 = P(\text{periodontitis} \mid x=1) = \frac{\text{Periodontitis (Floss)}}{\text{Total (Floss)}} = \frac{22}{97} \approx 0.2268$
 
 - Hence:
       $\beta_1 \approx \log\left(\frac{0.2268}{1 - 0.2268}\right) - \log\left(\frac{0.3585}{1 - 0.3585}\right) \approx \log(0.293) - \log(0.558) = -1.226 + 0.582 = -0.644$
@@ -230,8 +245,10 @@ $p_1 = \frac{\text{Periodontitis (Floss)}}{\text{Total (Floss)}} = \frac{22}{97}
 2.1.	Intercept $(\gamma_0)$:
 
 - $\gamma_0$ represents the log-odds of using dental floss when $y$ = 0 (periodontitis is absent):
+
     $\gamma_0 = \log\left(\frac{p_0}{1 - p_0}\right)$ where:
-    $p_0 = \frac{\text{Using Floss (No Periodontitis)}}{\text{Total (No Periodontitis)}} = \frac{75}{340} \approx 0.2205$
+    
+    $p_0 = P(\text{using dental floss} \mid y=0)  = \frac{\text{Using Floss (No Periodontitis)}}{\text{Total (No Periodontitis)}} = \frac{75}{340} \approx 0.2205$
 
 - Hence: $\gamma_0 \approx \log\left(\frac{0.2205}{1 - 0.2205}\right) = \log(0.282) \approx -1.262$ 
 
@@ -239,8 +256,10 @@ $p_1 = \frac{\text{Periodontitis (Floss)}}{\text{Total (Floss)}} = \frac{22}{97}
 2.2.	Slope $(\gamma_1)$:
 
 - $\gamma_1$ represents the change in log-odds of using dental floss when $y$ = 1 (periodontitis is present):
-        $\gamma_1 = \log\left(\frac{p_1}{1 - p_1}\right) - \log\left(\frac{p_0}{1 - p_0}\right)$ where:
-$p_1 = \frac{\text{Using Floss (Periodontitis)}}{\text{Total (Periodontitis)}} = \frac{22}{170} \approx 0.1294$
+
+    $\gamma_1 = \log\left(\frac{p_1}{1 - p_1}\right) - \log\left(\frac{p_0}{1 - p_0}\right)$ where:
+        
+    $p_1 = P(\text{using dental floss} \mid y=1) = \frac{\text{Using Floss (Periodontitis)}}{\text{Total (Periodontitis)}} = \frac{22}{170} \approx 0.1294$
 
 - Hence:
       $\gamma_1 \approx \log\left(\frac{0.1294}{1 - 0.1294}\right) - \log\left(\frac{0.2205}{1 - 0.2205}\right) \approx \log(0.149) - \log(0.282) = -1.906 + 1.262 = -0.644$
@@ -249,7 +268,7 @@ $p_1 = \frac{\text{Using Floss (Periodontitis)}}{\text{Total (Periodontitis)}} =
 ## Observation : 
 
 - The expected estimates of the parameters of Model A and Model B are consistent with the actual estimates obtained from the logistic regression models.
-- The intercepts $\beta_1$ and $\gamma_1$ are the same, indicating that the log-odds of periodontitis and dental floss use are similar when the other variable is absent.
+- The slopes of the two logistic regression models $\beta_1$ and $\gamma_1$ are the same, indicating that the change in log-odds of periodontitis and dental floss use are consistent with each other.
 
 ---
 
@@ -339,7 +358,7 @@ knitr::kable(t_updated_table, caption = "Original Data Table with Risk, Odds, an
   
 
 
-```{r echo=FALSE}
+```{r echo=FALSE, fig.align='center'}
 
 # Create an updated table with the new calculations
 updated_table <- data.frame(
@@ -359,13 +378,13 @@ plot(log_dose, risk, type = "b", col = "blue", pch = 19,
 grid()
 ```
 
-1. Risk vs log(dose) 
+**1. Risk vs log(dose):**
 
   - The graph confirms a strong dose response relationship. As log(dose) increases, the probability of developing a tumor increases rapidly.
   
 
 
-```{r echo=FALSE}
+```{r echo=FALSE, fig.align='center'}
 # Plot Log-Odds vs log(dose)
 plot(log_dose, log_odds, type = "b", col = "red", pch = 19,
      xlab = "log(Dose)", ylab = "Log-Odds",
@@ -373,7 +392,7 @@ plot(log_dose, log_odds, type = "b", col = "red", pch = 19,
 grid()
 ```
 
-2. Log-Odds vs log(dose)
+**2. Log-Odds vs log(dose):**
 
   - The graph shows a nearly linear relationship with log(dose) confirming that the data aligns well with the assumptions of logistic regression. 
   
@@ -404,16 +423,40 @@ We will use the logistic regression model to estimate this parameters.
 
 ```{r echo=FALSE}
 # Fit a logistic regression model
-model <- glm(cbind(tumor, no_tumor) ~ log_dose, family = binomial)
+model_tumor <- glm(cbind(tumor, no_tumor) ~ log_dose, family = binomial)
 
 # Summary of the model
-summary(model)
+summary_model_tumor <- summary(model_tumor)
+
+# Create a data frame with relevant data
+coefficients_table3 <- data.frame(
+  Term = rownames(summary_model_tumor$coefficients),
+  Estimate = summary_model_tumor$coefficients[, "Estimate"],
+  `Std. Error` = summary_model_tumor$coefficients[, "Std. Error"],
+  `z value` = summary_model_tumor$coefficients[, "z value"],
+  `Pr(>|z|)` = summary_model_tumor$coefficients[, "Pr(>|z|)"]
+)
+
+# print the coefficients table
+kable(
+  coefficients_table3,
+  caption = "Summary of Logistic Regression Model Coefficients",
+  align = c("l", "c", "c", "c", "c"),
+  col.names = c("Term", "Estimate", "Std. Error", "z value", "P-value")
+)
+
+# print the AIC score
+model_aic <- AIC(model_tumor)
+print(paste("AIC of the fitted model:", model_aic))
+
 ```
 
-```{r echo=FALSE}
+
+
+```{r echo=FALSE, fig.align='center'}
 # Generate fitted values for plotting
 new_dose <- seq(min(log_dose), max(log_dose), length.out = 100)
-predicted_risk <- predict(model, newdata = data.frame(log_dose = new_dose), type = "response")
+predicted_risk <- predict(model_tumor, newdata = data.frame(log_dose = new_dose), type = "response")
 
 # Add fitted curve to the risk plot
 plot(log_dose, risk, type = "b", col = "blue", pch = 19,
@@ -424,13 +467,15 @@ legend("topleft", legend = c("Observed Risk", "Fitted Logistic Curve"),
        col = c("blue", "darkgreen"), lty = c(1, 2), lwd = c(1, 2), pch = c(19, NA))
 grid()
 ```
-1. Intercept $\beta_0$
+
+
+**1. Intercept $\beta_0$:**
 
 According to the summary of the model, the intercept $\beta_{0}$ is 0.687. This represent the log-odds of developing a tumor when the dose is zero. Its corresponding odd are $e^{0.687} = 1.99$. This means that the odds of developing a tumor are nearly twice as high as the odds of not developing a tumor when the log(dose) is zero.
 
 Translating this to probabilities, the probability of developing a tumor is $P = \frac{e^{0.687}}{1 + e^{0.687}} = 0.665$. This means that the probability of developing a tumor is 66.5% when the dose is zero.
 
-2. Slope $\beta_1$
+**2. Slope $\beta_1$:**
 
 The slope parameter $\beta_{1}$ is 0.52037. This quantifies the change in the log-odds of developing a tumor for a one-unit increase in log(dose). A positive slope indicates that higher doses increase the odds of developing a tumor. the odds ratio is $e^{0.52037}\approx1.683$
 
@@ -447,27 +492,27 @@ Find the covariance matrix for the estimates and assess if they are correlated. 
 
 ### Approach :
 
-1. Covariance matrix for the estimates.
+1. Covariance matrix for the estimates:
 
   - The covariance matrix provides the variances and covariances of the parameter estimates $\beta_0. \beta_1$. The variances are the diagonal elements of the matrix, while the covariances are the off-diagonal elements. The correlation between the estimates can be calculated from their covariance:
   
-  $\text{Corr}(\beta_0, \beta_1) = \frac{\text{Cov}(\beta_0, \beta_1)}{\sqrt{\text{Var}(\beta_0) \times \text{Var}(\beta_1)}}$
+      $\text{Corr}(\beta_0, \beta_1) = \frac{\text{Cov}(\beta_0, \beta_1)}{\sqrt{\text{Var}(\beta_0) \times \text{Var}(\beta_1)}}$
   
-2. 95% confidence interval for the parameters.
+2. 95% confidence interval for the parameters:
 
   - The 95% confidence interval for the parameters can be calculated using the standard errors of the estimates. The confidence interval is given by:
   
-  $\text{CI} = \hat{\beta} \pm Z \cdot \text{SE}(\hat{\beta})$
+      $\text{CI} = \hat{\beta} \pm Z \cdot \text{SE}(\hat{\beta})$
   
-  where $\hat{\beta}$ is the estimate, $Z$ is the critical value for a 95% confidence interval, and $\text{SE}(\hat{\beta})$ is the standard error of the estimate.
+      where $\hat{\beta}$ is the estimate, $Z$ is the critical value for a 95% confidence interval, and $\text{SE}(\hat{\beta})$ is the standard error of the estimate.
   
-3. 95% confidence interval for the tumor risk at dose $0.25 (\log(\text{dose}) = -1.39)$
+3. 95% confidence interval for the tumor risk at dose $0.25 (\log(\text{dose}) = -1.39)$:
 
   - Using the logistic regression equation:
    
-  $\text{logit}(P) = \beta_0 + \beta_1 \times \text{log(dose})$
+      $\text{logit}(P) = \beta_0 + \beta_1 \times \text{log(dose})$
   
-  we calculate the predicted probability $P$ at $\log(dose = -1.39$
+      we calculate the predicted probability $P$ at $\log(dose) = -1.39$
   
   - To find the confidence interval for $P$, we:
   
@@ -478,23 +523,27 @@ Find the covariance matrix for the estimates and assess if they are correlated. 
     
 ### Results :
 
-^
-```{r echo=FALSE}
+
+```{r echo=FALSE, warning=FALSE}
 # Covariance matrix
-cov_matrix <- vcov(model)
-cov_matrix
+cov_matrix <- vcov(model_tumor)
+#print the cov matrix into summary table
+kable(cov_matrix, caption = "Covariance Matrix for Parameter Estimates")
 
 # Correlation between beta_0 and beta_1
 correlation <- cov_matrix[1, 2] / (sqrt(cov_matrix[1, 1] * cov_matrix[2, 2]))
-correlation
+#print correlation into summary table
+kable(data.frame(Correlation = correlation), caption = "Correlation between beta_0 and beta_1")
 
 # Confidence intervals for parameters
-confint_params <- confint(model, level = 0.95)
-confint_params
+confint_params <- confint(model_tumor, level = 0.95)
+#print the values into a summary table
+kable(data.frame(Confidence_Interval = confint_params), caption = "95% Confidence Intervals for Parameters")
+
 
 # Predicting risk at log(dose) = -1.39
 log_dose_value <- -1.39
-logit_p <- coef(model)[1] + coef(model)[2] * log_dose_value  # logit(P)
+logit_p <- coef(model_tumor)[1] + coef(model_tumor)[2] * log_dose_value  # logit(P)
 se_logit_p <- sqrt(cov_matrix[1, 1] + 2 * cov_matrix[1, 2] * log_dose_value + 
                    cov_matrix[2, 2] * log_dose_value^2)
 logit_p_ci <- c(logit_p - 1.96 * se_logit_p, logit_p + 1.96 * se_logit_p)
@@ -503,15 +552,19 @@ logit_p_ci <- c(logit_p - 1.96 * se_logit_p, logit_p + 1.96 * se_logit_p)
 p <- exp(logit_p) / (1 + exp(logit_p))
 p_ci <- exp(logit_p_ci) / (1 + exp(logit_p_ci))
 
-list(predicted_risk = p, confidence_interval = p_ci)
+#print values into summary table
+kable(data.frame(predicted_risk = p, confidence_interval = p_ci), caption = "Predicted Risk and Confidence Interval at log(dose) = -1.39")
+#list(predicted_risk = p, confidence_interval = p_ci)
 
 ```
 
-1. Covariance Matrix and Correlation
+### Interpretation :
+
+**I. Covariance Matrix and Correlation:**
+
+  - Covariance Matrix:
   
-  I. Covariance Matriz
-  
-  - The covariance matrix for the estimates $\beta_0$ and $\beta_1$ is:
+      - The covariance matrix for the estimates $\beta_0$ and $\beta_1$ is:
     
       - Variance of $\beta_0$: 0.06633.
       
@@ -519,13 +572,14 @@ list(predicted_risk = p, confidence_interval = p_ci)
       
       - Covariance between $\beta_0$ and $\beta_1$: 0.00723
     
-    The correlation between $\beta_0$ and $\beta_1$ is -0.98, indicating a strong negative correlation between the intercept and slope parameters.
+      - The correlation between $\beta_0$ and $\beta_1$ is -0.98, indicating a strong negative correlation between the intercept and slope parameters.
     
-  II. Correlation:
+  - Correlation:
   
-  - The correlation between $\beta_0$ and $\beta_1$ is 0.655 approximately, indicating a moderate positive correlation between the intercept and slope parameters.
-  
-2. Confidence Intervals for Parameters
+    - The correlation between $\beta_0$ and $\beta_1$ is 0.655 approximately, indicating a moderate positive correlation between the intercept and slope parameters.
+
+
+**II. Confidence Intervals for Parameters:**
 
   - Confidence Interval for $\beta_0$:
   
@@ -538,17 +592,16 @@ list(predicted_risk = p, confidence_interval = p_ci)
     - The 95% confidence interval for $\beta_1$ is approximately [0.363, 0.699].
     
     - This means that each one unit increase in log(dose) increases the log-odds of developing a tumor by approximately 0.363 to 0.699 with 95% confidence.
-    
-3. Predict Risk and Confidence Interval for P at a dose of 0.25 or log(dose) = -1.39
+
+
+**III. Predict Risk and Confidence Interval for P at a dose of 0.25 or log(dose) = -1.39:**
   
   - The predicted risk of developing a tumor at log(dose) = -1.39 is $P=0.409$ or 40.9%
    
   - The 95% confidence interval for the predicted risk is approximately [0.394, 0.588].
   
-  This means that at a dose of 0.25, the probability of developing a tumor is estimated to be between 39.4% and 58.8% with 95% confidence.
+    - This means that at a dose of 0.25, the probability of developing a tumor is estimated to be between 39.4% and 58.8% with 95% confidence.
   
-  
-### Conclusion :
 
 
 ## Question 4
@@ -557,7 +610,7 @@ Perform a Wald-test of $H_0 : \beta_1 = 0$. Explain and show, with your own calc
 
 ### Approach :
 
-1. Wald test:
+**1. Wald test:**
 
   - The wald test evaluates whether the slope of the parameter ($\beta_1$) is singificanlty different from zero.
   
@@ -565,41 +618,41 @@ Perform a Wald-test of $H_0 : \beta_1 = 0$. Explain and show, with your own calc
   
   - The alternative hypothesis is $H_1 : \beta_1 \neq 0$, indicating that the dose log(dose) has a significant effect on the probability of developing a tumor.
   
-2. Test Statistic:
+**2. Test Statistic:**
 
   - The Wald test statistic is computed as:
   
-  $W = \frac{\hat{\beta_1}}{\text{SE}(\hat{\beta_1})}$
+    $W = \frac{\hat{\beta_1}}{\text{SE}(\hat{\beta_1})}$
   
   - Under the null hypothesis, $W$ follows a standard normal distribution.
   
-3. P-value:
+**3. P-value:**
 
   - The p-value is calculated as:
   
-  $P = 2 \times P(Z > |w|)$
+    $P = 2 \times P(Z > |w|)$
   
 ### Results :
 
 ```{r echo=FALSE}
 
 # Extract the estimate and standard error for beta_1
-beta1 <- coef(model)[2]
+beta1 <- coef(model_tumor)[2]
 se_beta1 <- sqrt(cov_matrix[2, 2])
 
 # Wald test statistic
-wald_statistic <- beta1 / se_beta1
-cat("Wald Statistic: ", wald_statistic)
+wald_statistic_beta1 <- beta1 / se_beta1
 
 # P-value
-p_value <- 2 * (1 - pnorm(abs(wald_statistic)))
-cat("\nP-Value: ", p_value)
+p_value_beta1 <- 2 * (1 - pnorm(abs(wald_statistic_beta1)))
+
+#print the values into a summary table
+kable(data.frame(Wald_Statistic = wald_statistic_beta1, P_Value = p_value_beta1), caption = "Wald Test Results")
 
 ```
 
 
-
-1. Significance of the Slope $\beta_1$
+**Significance of the Slope $\beta_1$:**
 
   - A large Wald statistic $W = 6.12$ means that the effect of the log(dose) on tumor probability is highly significant.
 
@@ -651,34 +704,19 @@ variances <- sapply(results, function(res) res$variances)
 rownames(variances) <- c("Variance (Intercept)", "Variance (log_dose)")
 colnames(variances) <- paste0("Scale_", scales)
 
-# Display the variances
-variances
+# Display the variances in a summary table
+kable(variances, caption = "Variance of Parameter Estimates for Different Sample Sizes")
 ```
 
-1. Variance of the intercept $\beta_0$:
-
-  - Scale 10: $0.0066333693$
-  
-  - Scale 100: $6.633369 \times 10^{-4}$
-  
-  - Scale 1000: $6.633369 \times 10^{-5}$
-  
-2. Variance of the Slope ($\beta_1$):
-
-  - Scale 10: $0.0007229093$
-  
-  - Scale 100: $7.229093 \times 10^{-5}$
-  
-  - Scale 1000: $7.229093 \times 10^{-6}$
-  
-3. Interpretation:
+### Interpretation :
 
   - As the sample increases, the variances of both $\beta_0$ and $\beta_1$ decrease proportionally. This supports
   
-  $\text{Variance} \propto \frac{1}{\text{Sample Size}}$
-  
-  - The variances decrease by a factor of 10, 100 and 100 as the counts are scaled, showing that larger samples sizes result in more precise estimates.
-  
+      $\text{Variance} \propto \frac{1}{\text{Sample Size}}$
+      
+  - The variance of the intercept $\beta_0$ and $\beta_1$ decreases by a factor of 10, 100, and 1000 as the counts are scaled, showing that larger samples sizes result in more precise estimates.
+
+
 ### Conclusion :
   
 As expected, increasing the sample size reduces the variances of the parameter estimates. This demonstrates the inverse relationship between sample size and variance, confirming that larger datasets provide more precise estimates. Both the intercept $\beta_0$ and slope $\beta_1$ benefit from increased precision with larger sample sizes. So the statement of the question is TRUE.
