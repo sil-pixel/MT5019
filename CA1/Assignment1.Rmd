@@ -294,6 +294,8 @@ of logarithm of odds ratio.
 
 - 95% confidence interval for ${\log(\text{OR})}$: ${\log(\text{OR}) \pm z_{0.975} \times \text{SE}_{OR}}$
 
+- Then, we get the confidence interval for the $\text{OR}$ by exponentiating the above bounds.
+
 ### R Output: 
 
 ```{r echo=FALSE, fig.align='center'}
@@ -316,7 +318,7 @@ kable(odds_results, caption = "Odds Ratio and Confidence Interval", align = c("l
 
 ###  Interpretation
 
-- The estimated odds ratio is 0.7015 indicating that the men are 30% less likely to support legal abortion compared to women. 
+- The estimated odds ratio is 0.7015 indicating that the odds of men supporting legal abortion are about 70.2% of the odds of women supporting it. 
 - The 95% confidence interval (0.556, 0.886) does not include 1, indicating a statistically significant difference in the opinions.
 
 ## Question 4: Risk Ratio and 95% Confidence Interval
@@ -379,6 +381,8 @@ the confidence interval of logarithm of risk ratio.
 ${= \sqrt{\frac{1}{319} - \frac{1}{600} + \frac{1}{309} - \frac{1}{500}} \approx 0.1}$
 
 - 95% Confidence Interval for $log(RR)$: ${\log(\text{RR}) \pm z_{0.975} \times \text{SE}_{RR}}$
+
+- Then, we have to get the confidence interval for the $\text{RR}$ by exponentiating the above bounds.
 
 ### R Output: 
 
@@ -821,7 +825,8 @@ kable(
 
 ```{r echo=FALSE}
 # Calculate Risk Ratio and Confidence Interval
-risk_ratio_result <- riskratio(tab2, rev = "neither")
+risk_ratio_result <- riskratio(tab2, rev = "both")
+# 0.4451/0.3035=1.467
 # Extract the relevant results
 risk_ratio_summary <- data.frame(
   Measure = c("Risk Ratio", "95% CI Lower", "95% CI Upper"),
@@ -866,7 +871,7 @@ According to the odds ratio, men have 1.841 times higher odds of being admitted 
 
 ${\text{RR} = 1.467, 95\% \text{ CI } (1.353, 1.591)}$
 
-Men are 1.255 times more likely to be admitted compared to women. The confidence interval does not include 1, indicating a statistically significant difference in admission risk.
+Men are 1.467 times more likely to be admitted compared to women. The confidence interval does not include 1, indicating a statistically significant difference in admission risk.
 
 ### Conclusion:
 
@@ -880,7 +885,6 @@ The approach is similar to the previous question. We will analyze what happens i
 
 
 ```{r echo=FALSE, eval=FALSE}
-# is the output necessary here? the results are already included in the tables
 # Function to analyze data
 analyze_table <- function(data) {
   # Perform Chi-Squared Test
@@ -888,7 +892,7 @@ analyze_table <- function(data) {
   
   # Odds Ratio and Risk Ratio
   odds_ratio_result <- oddsratio(data, method = "wald", rev = "neither")
-  risk_ratio_result <- riskratio(data, rev = "neither")
+  risk_ratio_result <- riskratio(data, rev = "both")
   
   list(
     "Chi-Squared Test" = chi_result,
@@ -956,7 +960,7 @@ odds_ratio_table <- data.frame(
 # Print the Odds Ratio table using knitr::kable
 knitr::kable(
   odds_ratio_table,
-  col.names = c("Dataset", "Odds Ratio (Women)", "95% Confidence Interval"),
+  col.names = c("Dataset", "Odds Ratio (Men/Women)", "95% Confidence Interval"),
   caption = "Odds Ratio for Women Across Datasets",
   align = c("l", "c", "c")
 )
@@ -971,22 +975,22 @@ The risk ratio compares the probability of admission for men and women. The resu
 ```{r echo=FALSE}
 # Create the data frame for the Risk Ratio table
 risk_ratio_table <- data.frame(
-  Dataset = c("Original", "One-Tenth", "One-Hundredth"),
-  `Risk Ratio (Women)` = c(1.255, 1.256, 1.232),
-  `95% Confidence Interval` = c("[1.200, 1.314]", "[1.088, 1.450]", "[0.781, 1.941]")
+  Dataset = c("Original", "One-Tenth", "One-Hundredth"), 
+  `Risk Ratio (Women)` = c(1.467, 1.466, 1.407),
+  `95% Confidence Interval` = c("[1.353, 1.591]", "[1.135, 1.893]", "[0.642, 3.085]")
 )
 
 # Print the Risk Ratio table using knitr::kable
 knitr::kable(
   risk_ratio_table,
-  col.names = c("Dataset", "Risk Ratio (Women)", "95% Confidence Interval"),
+  col.names = c("Dataset", "Risk Ratio (Men/Women)", "95% Confidence Interval"),
   caption = "Risk Ratio for Women Across Datasets",
   align = c("l", "c", "c")
 ) 
 ```
 
 
-The risk ratio across the three datasets shows a consistent value, varied only slightly. The confidence interval, however, widens as the sample size decreases, reflecting the increased uncertainty in the estimate. So for the original dataset, the risk ratio is 1.255, with a 95% confidence interval of [1.200, 1.314], which is very narrow, reflecting high precision. On the other hand, for the one-hundredth dataset, the risk ratio is 1.232, with a 95% confidence interval of [0.781, 1.941], which is much wider, reflecting low precision. Moreover, for the original dataset, the confidence interval does not include 1, indicating statistical significance. However, for the one-hundredth dataset, the confidence interval includes 1, indicating no statistical significance.
+The risk ratio across the three datasets shows a consistent value, varied only slightly. The confidence interval, however, widens as the sample size decreases, reflecting the increased uncertainty in the estimate. So for the original dataset, the risk ratio is 1.467, with a 95% confidence interval of [1.353, 1.591], which is very narrow, reflecting high precision. On the other hand, for the one-hundredth dataset, the risk ratio is 1.466, with a 95% confidence interval of [1.135, 1.893], which is comparatively wider, reflecting lower precision. Moreover, for the original dataset, the confidence interval does not include 1, indicating statistical significance. However, for the one-hundredth dataset, the risk ratio is 1.407, with a 95% confidence interval of [0.642, 3.085]. Even though the risk ratio is close to the original and one-tenth risk ratio, the 95% confidence interval is much wider, reflecting the lowest precision. The confidence interval for one-hundredth dataset includes 1, indicating no statistical significance.
 
 ### Conclusion:
 

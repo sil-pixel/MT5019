@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2024) (preloaded format=pdflatex 2024.9.26)  25 NOV 2024 19:33
+This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2024) (preloaded format=pdflatex 2024.9.26)  30 NOV 2024 00:40
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -675,7 +675,7 @@ al/texlive/2024/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc}{/usr/local/texlive/202
 fonts/enc/dvips/lm/lm-rm.enc}{/usr/local/texlive/2024/texmf-dist/fonts/enc/dvip
 s/lm/lm-mathsy.enc}{/usr/local/texlive/2024/texmf-dist/fonts/enc/dvips/lm/lm-ma
 thit.enc}] [2{/usr/local/texlive/2024/texmf-dist/fonts/enc/dvips/lm/lm-mathex.e
-nc}] [3] [4] [5] [6] [7] [8] [9] [10] [11] [12] [13] (./Assignment1.aux)
+nc}] [3] [4] [5] [6] [7] [8] [9] [10] [11] [12] [13] [14] (./Assignment1.aux)
  ***********
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-02-20>
@@ -685,13 +685,13 @@ LaTeX Warning: There were multiply-defined labels.
 
  ) 
 Here is how much of TeX's memory you used:
- 15491 strings out of 474116
- 242440 string characters out of 5743682
+ 15490 strings out of 474116
+ 242425 string characters out of 5743682
  1942187 words of memory out of 5000000
  37331 multiletter control sequences out of 15000+600000
- 616063 words of font info for 144 fonts, out of 8000000 for 9000
+ 615980 words of font info for 143 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 83i,7n,93p,1008b,564s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 83i,7n,93p,1008b,568s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/local/texlive/2024/texmf-dist/fonts/type1/public/lm/lmbx10.pfb></usr/lo
 cal/texlive/2024/texmf-dist/fonts/type1/public/lm/lmbx12.pfb></usr/local/texliv
 e/2024/texmf-dist/fonts/type1/public/lm/lmex10.pfb></usr/local/texlive/2024/tex
@@ -704,10 +704,10 @@ xlive/2024/texmf-dist/fonts/type1/public/lm/lmr5.pfb></usr/local/texlive/2024/t
 exmf-dist/fonts/type1/public/lm/lmr7.pfb></usr/local/texlive/2024/texmf-dist/fo
 nts/type1/public/lm/lmsy10.pfb></usr/local/texlive/2024/texmf-dist/fonts/type1/
 public/lm/lmsy7.pfb>
-Output written on Assignment1.pdf (13 pages, 273024 bytes).
+Output written on Assignment1.pdf (14 pages, 273951 bytes).
 PDF statistics:
- 411 PDF objects out of 1000 (max. 8388607)
- 362 compressed objects within 4 object streams
- 113 named destinations out of 1000 (max. 500000)
+ 415 PDF objects out of 1000 (max. 8388607)
+ 365 compressed objects within 4 object streams
+ 114 named destinations out of 1000 (max. 500000)
  33137 words of extra memory for PDF output out of 35830 (max. 10000000)
 
