@@ -270,10 +270,6 @@ kable(results, caption = "Odds Ratio Results", align = c("l", "c", "c")) %>%
 
 Alternative Odds Ratios can be formulated depending on the conditioning variable:
 
-Odds ratio of being a man vs. a woman among those “in favor”:
-
-${\text{OR} = \frac{\text{Men In Favor / Women In Favor}}{\text{Men Against / Women Against}}}$
-
 Odds ratio of being against legal abortion for men vs. women:
 
 ${\text{OR} = \frac{\text{Men Against / Women Against}}{\text{Men In Favor / Women In Favor}}}$
@@ -1108,9 +1104,9 @@ Using the formula:
 
 **3. Statistical tests:**
 
-  - Likelihood Ratio Test: $G^2 = 4.275, p = 0.0387$
+  - Likelihood Ratio Test: $G^2 = 4.275, p = 0.03867$
   
-  - Chi-Squared Test: $X^2 = 4.275, p = 0.0386$
+  - Chi-Squared Test: $X^2 = 4.275, p = 0.03867$
   
 ### Conclusion:
 
