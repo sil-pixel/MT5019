@@ -1,5 +1,6 @@
 ---
 title: "AssignmentIII"
+subtitle: "Log-Linear Models"
 author: "Silpa Soni Nallacheruvu (19980824-5287) Hernan Aldana (20000526-4999)"
 date: "`r Sys.Date()`"
 output: pdf_document
@@ -7,22 +8,136 @@ output: pdf_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(MASS)
+library(knitr)
+library(stringr)
 ```
 
-# Summary
+---
 
-# Exercise 3:1
+# Exercise 3:1 (Higher Dimension Table)
 
-## Approach : 
+## Question1: 
 
-## Code :
+Fit several models in order to find a 'good' model for the data.
 
-```{r echo=FALSE}
+### Approach: 
 
+**1. Read the data:**
+
+- The given dataset 'data_ca3.csv' contains the variables X, Y, Z, and V, along with their corresponding frequencies (n).
+  
+**2. Fit a saturated model:**
+
+- Fit a saturated model which includes all four variables X, Y, Z, and V and all their interactions. It fits the data perfectly and serves as the reference model.
+  
+**3. Reduced Models:**
+
+- We started by removing the 4 way interaction term from the saturated model.
+- Then, we removed the 3 way interaction terms, then 2 way interaction terms, and finally we fit a model with the only the main effects.
+- We removed interactions in a systematic way, where higher order interactions are removed before lower order interactions to evaluate the effect of each interaction term on the model.
+  
+**4. Model Comparison:**
+
+- We compared the models using deviance, degrees of freedom, p-value, and AIC.
+- We calculated the p-value using the chi-square distribution calculated from the deviance and degrees of freedom.
+
+
+## R Output:
+
+```{r echo=FALSE, message=FALSE}
+
+# Read the data
+data3<-read.csv("data_ca3.csv")
+
+# Create a data frame to store results
+model_results <- data.frame(
+  Model = character(),
+  Deviance = numeric(),
+  df = numeric(),
+  `p-value` = numeric(),
+  AIC = numeric()
+)
+
+# Define a function to extract model information
+extract_model_info <- function(model, description) {
+  data.frame(
+    Model = description,
+    Deviance = model$deviance,
+    df = model$df.residual,
+    `p-value` = 1 - pchisq(model$deviance, model$df.residual),
+    AIC = AIC(model)
+  )
+}
+
+# Saturated model:
+msat<-glm(n~x*y*z*v, family=poisson(link=log), data=data3)
+
+# Add the saturated model to results
+model_results <- rbind(model_results, extract_model_info(msat, "XYZV"))
+
+#generate interactions
+terms <- c("x*y*z", "x*y*v", "x*z*v", "y*z*v")
+interaction_combinations34 <- combn(terms, 4, simplify = FALSE)
+interaction_combinations33 <- combn(terms, 3, simplify = FALSE)
+interaction_combinations32 <- combn(terms, 2, simplify = FALSE)
+interaction_combinations31 <- combn(terms, 1, simplify = FALSE)
+terms2 <- c("x*y", "x*z", "x*v", "y*z", "y*v", "z*v")
+interaction_combinations26 <- combn(terms2, 6, simplify = FALSE)
+interaction_combinations25 <- combn(terms2, 5, simplify = FALSE)
+interaction_combinations24 <- combn(terms2, 4, simplify = FALSE)
+interaction_combinations23 <- combn(terms2, 3, simplify = FALSE)
+interaction_combinations22 <- combn(terms2, 2, simplify = FALSE)
+interaction_combinations21 <- combn(terms2, 1, simplify = FALSE)
+terms3 <- c("x", "y", "z", "v")
+interaction_combinations14 <- combn(terms3, 4, simplify = FALSE)
+#combine all interactions
+interaction_combinations <- c(interaction_combinations34, interaction_combinations33, interaction_combinations32, interaction_combinations31, interaction_combinations26, interaction_combinations25, interaction_combinations24, interaction_combinations23, interaction_combinations22, interaction_combinations21, interaction_combinations14)
+
+# Function to generate and evaluate models with three-way interactions
+evaluate_interactions <- function(data, terms, model_results) {
+  # Loop through each combination of interactions
+  for (combo in terms) {
+    # Generate model formula
+    interaction_terms <- paste(combo, collapse = "+")
+    formula <- as.formula(paste("n ~", interaction_terms))
+    
+    # Fit the model
+    model <- glm(formula, family = poisson(link = "log"), data = data)
+    
+    # Append results
+    model_results <- rbind(
+      model_results,
+      extract_model_info(model, str_to_upper(paste(gsub("\\*", "", combo), collapse=',')))
+    )
+  }
+  
+  return(model_results)
+}
+
+model_results <- evaluate_interactions(data3, interaction_combinations, model_results)
+#print the model results into a table
+kable(model_results, caption = "Model Comparison Results", align = c("l", "c", "c", "c", "c"), col.names = c("Model", "Deviance", "df", "p-value", "AIC"))
 ```
 
-## Output : 
+## Conclusion:
 
-## Observation : 
+**1. Trends in AIC Across Models:**
 
+  - Models with only main effects or single two-way interactions have high AICs, indicating poor fit.
+  - Adding specific two-way and three-way interactions significantly improves the AIC, highlighting the importance of these interaction terms for explaining the data.
 
+**2. Impact of Higher-Order Interactions:**
+
+  - Models including higher-order interactions (e.g., XYZV) exhibit extremely low p-values, suggesting overfitting and unnecessary complexity. The saturated model achieves perfect fit but at the cost of increased complexity, as reflected in its AIC.
+  - Models with XYV, XZV as interactions have the highest p-values, indicating that removing some of the three-way interactions does not significantly reduce the model fit. These models are candidates for simpler yet statistically robust options.
+  
+  
+## Question2:   
+  
+### this fits better in question 2 rather as a conclusion in question 1
+
+The model with the lowest AIC is the one with interactions XY, XZ, XV, YV, ZV, suggesting it balances goodness-of-fit and model complexity most effectively. This model includes all two-way interactions except YZ, capturing significant dependencies among variables while avoiding overfitting.  
+
+Recommendation for a ‘Good’ Model:
+Based on the results, the model with XY, XZ, XV, YV, ZV is recommended for its optimal balance of simplicity and fit (lowest AIC). However, models like XYV, XZV might also be considered if further parsimony is desired, given their statistical significance.
