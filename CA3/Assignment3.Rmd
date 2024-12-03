@@ -19,7 +19,21 @@ library(stringr)
 
 ## Question1: 
 
-Fit several models in order to find a 'good' model for the data.
+Fit several models in order to find a 'good' model for the given data collected from a birth clinic, which includes information on the mother's age, her smoking habits (number of cigarettes per day), gestational age (in days) and the survival status of the child.
+
+```{r echo=FALSE, message=FALSE}
+# Create the table data
+data <- data.frame(
+  `Mother's age` = c("< 30", "< 30", "< 30", "< 30", "30+", "30+", "30+", "30+"),
+  `Smoking habits` = c("< 5", "< 5", "5+", "5+", "< 5", "< 5", "5+", "5+"),
+  `Gestational age` = c("< 260", ">= 260", "< 260", ">= 260", "< 260", ">= 260", "< 260", ">= 260"),
+  `Child survival - No` = c(50, 24, 9, 6, 41, 14, 4, 1),
+  `Child survival - Yes` = c(315, 4012, 40, 459, 147, 1594, 11, 124)
+)
+
+# Generate the table
+kable(data, caption = "Data from the study on the association of variables with child survival", col.names = c("Mother's age", "Smoking habits", "Gestational age", "Child survival - No", "Child survival - Yes"))
+```
 
 ### Approach: 
 
