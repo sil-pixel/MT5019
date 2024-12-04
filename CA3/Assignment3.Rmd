@@ -57,7 +57,7 @@ kable(data, caption = "Data from the study on the association of variables with 
 - We calculated the p-value using the chi-square distribution calculated from the deviance and degrees of freedom.
 
 
-## R Output:
+### R Output:
 
 ```{r echo=FALSE, message=FALSE}
 
@@ -134,7 +134,7 @@ model_results <- evaluate_interactions(data3, interaction_combinations, model_re
 kable(model_results, caption = "Model Comparison Results", align = c("l", "c", "c", "c", "c"), col.names = c("Model", "Deviance", "df", "p-value", "AIC"))
 ```
 
-## Conclusion:
+### Conclusion:
 
 **1. Trends in AIC Across Models:**
 
@@ -148,6 +148,95 @@ kable(model_results, caption = "Model Comparison Results", align = c("l", "c", "
   
   
 ## Question2:   
+
+### Approach: 
+
+To answer question 2, we aim to identify a good model that balances simplicity and fit. A good model should:
+
+  - Explain the Relationships: Capture significant associations between variables.
+  
+  - Avoid Overfitting: Include only necessary interactions to prevent overfitting.
+  
+  - Optimize Fit: Minimize AIC and retain a good fit as assessed by likelihood ratio tests.
+
+We assume that higher-order interactions (e.g., 3-way and 4-way) might not significantly contribute to explaining the relationships, as they may be too complex and difficult to interpret, as well as prone to overfitting. Therefore our focus will be on identifying the best model with two-way interactions. To do this we have to follow this steps:
+
+  - Start with the Saturated Model: Fit a saturated model with all interactions to establish a baseline.
+  
+  - Fit Reduced Models: Gradually remove higher-order interactions (3-way and 4-way) and evaluate the impact on model fit.
+  
+  - Evaluate models: Compare models based on AIC, p-values, and goodness-of-fit, and p-values from LRT. 
+  
+  - Select the Best Model: Identify the model with the lowest AIC that balances fit and complexity.
+  
+```{r echo=FALSE, message=FALSE}
+# Load the data
+data3 <- read.csv("data_ca3.csv")
+
+# Saturated model with all interactions
+msat <- glm(n ~ x * y * z * v, family = poisson(link = "log"), data = data3)
+
+# Reduced model with two-way interactions: XY, XZ, XV, YV, ZV
+m1 <- glm(n ~ x * y + x * z + x * v + y * v + z * v, family = poisson(link = "log"), data = data3)
+
+# Compare models using AIC and LRT
+aic_results <- AIC(msat, m1)
+lrt_results <- anova(msat, m1, test = "LRT")
+
+# Output results
+print("AIC Results:")
+print(aic_results)
+
+print("Likelihood Ratio Test Results:")
+print(lrt_results)
+
+# Summary of the chosen model (m1)
+summary(m1)
+```
+### Results
+
+**AIC Results:**
+
+Saturate model (msat): AIC =  123.9732
+Reduced model (m1): AIC =  113.7953
+
+The reduced model (m1) has a lower AIC value compared to the saturated model, indicating a better balance between goodness-of-fit with fewer parameters.
+
+**Residual Deviance:**
+
+Saturation model (msat): 0.0000 (perfect fit)
+Reduced model (m1): 1.8221
+
+**Model coefficients**
+
+All coefficients in the reduced model (m1) are statistically significant (p < 0.05), with the exception of a few borderline cases.
+
+The chosen model(m1) includes significant two-way interactions XY, XZ, XV, YV, ZV. This interactions highlight the relationships between:
+
+  - Mother's age and smoking habits (XY): Indicates that smoking habits vary significantly accross maternal age groups.
+  
+  - Mother's age and gestational age (XZ): Suggests that gestational age may be influenced by maternal age.
+  
+  - Mother's age and child survival (XV): Indicates that child survival is critically dependent on maternal age.
+  
+  - Smoking habits and child survival (YV): Shows the direct impact of smoking habits on child survival rates.
+  
+  - Gestational age and child survival (ZV): Reinforces that gestational age is a key factor in determining child survival rates.
+
+
+### Conclusion:
+
+The reduced model (m1) with interactions XY, XZ, XV, YV, ZV was selected as the best model because:
+
+  - It has the lowest AIC.
+
+  - It retains statistically significan two way interactions that provide interpretable results inot the relationships between variables.
+  
+  - Removing higher-order interactions (3-way and 4-way) did not significantly impact the model fit, as evidenced by the residual deviance and p-values.
+  
+  
+  
+  
   
 ### this fits better in question 2 rather as a conclusion in question 1
 
@@ -155,3 +244,5 @@ The model with the lowest AIC is the one with interactions XY, XZ, XV, YV, ZV, s
 
 Recommendation for a ‘Good’ Model:
 Based on the results, the model with XY, XZ, XV, YV, ZV is recommended for its optimal balance of simplicity and fit (lowest AIC). However, models like XYV, XZV might also be considered if further parsimony is desired, given their statistical significance.
+ 
+
