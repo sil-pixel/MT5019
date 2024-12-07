@@ -317,7 +317,7 @@ The odds of child survival based on the odds ratios and confidence intervals for
   Smoking habits and gestational age have the strongest influence on child survival, as shown by their odds ratios.
   
   
-## Question 4
+## Question 4:
 
 Fit a logistic regression model for the probability of child survival as a function of the explanatory variables. Interpret the results.
 
@@ -339,7 +339,7 @@ Fit a logistic regression model for the probability of child survival as a funct
 
 ### Interpretation of Results:
 
-````{r echo=FALSE, message=FALSE}
+```{r echo=FALSE, message=FALSE}
 # Expand the dataset into a binary response table
 binary_data <- data3[rep(1:nrow(data3), data3$n), ]  # Expand rows by frequency `n`
 binary_data$n <- NULL  # Drop the frequency column, as it's no longer needed
@@ -369,7 +369,7 @@ logit_results <- data.frame(
 kable(logit_results, caption = "Logistic Regression Results: Odds Ratios, Confidence Intervals, and P-Values")
 ```
 
-- Model Summary
+-**Model Summary:**
 
   - Null deviance: 1435.5 
   
@@ -377,48 +377,99 @@ kable(logit_results, caption = "Logistic Regression Results: Odds Ratios, Confid
     
     - a significant reduction in deviance from the null model, indicating a good fit.
     
-  - AIC: 1097.6
   
-  
--Significant Predictors
+-**Significant Predictors:**
 
  - Intercept:
  
-    - Odds ratio = 6.37: The baseline of child survival when all predi ctors are zero.
+    - Odds ratio = 6.37: The baseline of child survival when all predictors are zero.
     
-    - Highly significant (p < 0.001).
+    - Highly significant (p < 0.05).
     
   - Mother's age (X):
   
-    - Estimate = -0.5893: Older mothers have decreased odds of child survival.
+    - Estimate = -0.5893: Older mothers have decreased odds of their child survival.
     
-    - Odds Ratio = 0.55: The odds of child survival decrease by 45% (for each year increase in maternal age.)1-0.55) for older mothers.
+    - Odds Ratio = 0.55: The odds of child survival decrease by 45% (for each year increase in maternal age(=1-0.55) for older mothers.
     
-    - Significant (p < 0.010).
+    - Significant (p = 0.01 < 0.05).
     
   - Gestational age (Z):
   
     - Estimate = 3.2479: Higher gestational age strongly increases the odds of child survival.
     
-    - Odds Ratio = 25.74: For a longer gestational age, the odds of child survival increase by 2574%.
+    - Odds Ratio = 25.74: For a longer gestational age, the odds of child survival are 25.74 higher for a one-unit increase in gestational age.
     
-    - Highly significant (p < 0.001).
+    - Highly significant (p < 0.05).
     
 ### Conclusion:
 
-The logistic regression analysis provides valuable insight into the factors influencing child survival. The significan predictors in the model are Mother's age and Gestational age, which have a significant impact on child survival odds.
+The logistic regression analysis provides valuable insight into the factors influencing child survival. The significant predictors in the model are Mother's age and Gestational age, which have a fairly strong impact on child survival odds.
 
 - Mother's age: Older mothers have lower odds of child survival, with a 45% decrease in odds for each year increase in maternal age.
 
-- Gestational age: Longer gestational age significantly increases the odds of child survival, with a 2574% increase in odds for each additional day of gestation.
+- Gestational age: Longer gestational age significantly increases the odds of child survival, with a 2474% increase in odds for each additional day of gestation.
 
 - Model fit: The model shows a significant reduction in deviance from the null model, indicating a good fit. The AIC value of 1097.6 suggests that the model is relatively simple and provides a good balance between fit and complexity.
   
 While smoking habits were not statistically significant in this analysis, further research may be needed to explore the impact of smoking on child survival in more detail.
   
   
+## Question 5: 
+
+Illustrate the relationship between the logistic regression model from question 4 and a corresponding log-linear model. Confirm that the two models gives identical estimates and standard errors of the corresponding parameters.
+
+### Approach:
+
+- **Log-Linear Model:**
+
+  - Fit a log-linear model to analyze the relationship between the categorical variables Mother's age, Smoking habits, Gestational age, and Child survival to capture the relationships corresponding to the logistic regression model where Child survival is the response variable.
   
+  - Use the glm() function with the family argument set to poisson(link = "log") to fit the log-linear model with interaction variables as $x * y * v, x * z * v, y * z * v$.
   
+- **Relationship between Log-Linear and Logistic Regression Models:**
+
+  - The log-linear model is used to analyze the relationship between categorical variables, while the logistic regression model is used to model the relationship between categorical response variables and explanatory variables.
   
+  - Both models are generalized linear models (GLMs) that use the log link function to model the relationship between variables.
+  
+- **Comparison of Estimates and Standard Errors:**
+
+  - We will compare the estimates and standard errors of the corresponding parameters from the log-linear and logistic regression models to confirm that they are identical.
+  
+  - We will extract the coefficients and standard errors from both models and compare them to verify the consistency of the results.
+  
+### Comparison of Estimates and Standard Errors:
+
+```{r echo=FALSE, message=FALSE}
+# Extract coefficients and standard errors from the log-linear model
+m_new <- glm(n ~ x * y * v + x * z * v + y * z * v, family = poisson(link = "log"), data = data3)
+log_linear_coefs <- coef(m_new)[c("x:v", "y:v", "v:z", "x:y:v", "x:v:z", "y:v:z")]
+log_linear_se <- summary(m_new)$coefficients[, 2][c("x:v", "y:v", "v:z", "x:y:v", 
+                                                 "x:v:z", "y:v:z")]
+
+# Extract coefficients and standard errors from the logistic regression model
+logit_coefs <- coef(logit_model)[c("x", "y", "z", "x:y", "x:z", "y:z")]
+logit_se <- summary(logit_model)$coefficients[, 2][c("x", "y", "z", "x:y", "x:z"
+                                                     , "y:z")]
+
+# Create a data frame to compare the estimates and standard errors
+comparison_results <- data.frame(
+  Variable = c("Mother's age", "Smoking habits", "Gestational age", "Mother's age:Smoking habits", "Mother's age:Gestational age", "Smoking habits:Gestational age"),
+  Log_Linear_Est = log_linear_coefs,
+  Logistic_Est = logit_coefs,
+  Log_Linear_SE = log_linear_se,
+  Logistic_SE = logit_se
+)
+
+# Print the comparison results in a table
+kable(comparison_results, caption = "Comparison of Estimates and Standard Errors between Log-Linear and Logistic Regression Models")
+```
+
+### Interpretation:
+
+- The estimates and standard errors for Mother's age, Smoking habits, and Gestational age and the interaction variables are consistent between the two models, indicating that the relationship between these variables and child survival is accurately captured by both models.
+- The comparison of estimates and standard errors confirms that the log-linear and logistic regression models provide identical estimates and standard errors for the corresponding parameters, demonstrating the consistency and reliability of the results.
+
   
   
