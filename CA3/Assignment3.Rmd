@@ -315,3 +315,110 @@ The odds of child survival based on the odds ratios and confidence intervals for
   Variables with confidence intervals that exclude 1 (x:y, x:v, z:v) are statistically significant predictors.
 - Practical Implications: 
   Smoking habits and gestational age have the strongest influence on child survival, as shown by their odds ratios.
+  
+  
+## Question 4
+
+Fit a logistic regression model for the probability of child survival as a function of the explanatory variables. Interpret the results.
+
+### Approach:
+
+- Define the logistic regression Model:
+  
+  - Set Child Survival (V) as the response variable.
+  
+  - Use Mother's age (X), Smoking habits (Y), and Gestational age (Z) as explanatory variables.
+  
+- Fit the logistic Regression Model:
+
+  - Use the glm() function with the family argument set to binomial(link = "logit") to fit the logistic regression model.
+  
+- Interpret the Results:
+  
+  - Examine the coefficients to determine the direction and strength of the relationships.
+
+### Interpretation of Results:
+
+````{r echo=FALSE, message=FALSE}
+# Expand the dataset into a binary response table
+binary_data <- data3[rep(1:nrow(data3), data3$n), ]  # Expand rows by frequency `n`
+binary_data$n <- NULL  # Drop the frequency column, as it's no longer needed
+
+# Fit the logistic regression model
+logit_model <- glm(v ~ x + y + z + x:y + x:z + y:z, 
+                   family = binomial(link = "logit"), 
+                   data = binary_data)
+
+# Display the summary of the logistic regression model
+summary(logit_model)
+
+# Calculate odds ratios and confidence intervals
+odds_ratios <- exp(coef(logit_model))
+conf_intervals <- exp(confint(logit_model))
+
+# Combine results into a data frame for interpretation
+logit_results <- data.frame(
+  Variable = names(odds_ratios),
+  Odds_Ratio = odds_ratios,
+  Lower_CI = conf_intervals[, 1],
+  Upper_CI = conf_intervals[, 2],
+  P_Value = summary(logit_model)$coefficients[, 4]
+)
+
+# Print the logistic regression results in a table
+kable(logit_results, caption = "Logistic Regression Results: Odds Ratios, Confidence Intervals, and P-Values")
+```
+
+- Model Summary
+
+  - Null deviance: 1435.5 
+  
+  - Residual Deviance: 1083.6
+    
+    - a significant reduction in deviance from the null model, indicating a good fit.
+    
+  - AIC: 1097.6
+  
+  
+-Significant Predictors
+
+ - Intercept:
+ 
+    - Odds ratio = 6.37: The baseline of child survival when all predi ctors are zero.
+    
+    - Highly significant (p < 0.001).
+    
+  - Mother's age (X):
+  
+    - Estimate = -0.5893: Older mothers have decreased odds of child survival.
+    
+    - Odds Ratio = 0.55: The odds of child survival decrease by 45% (for each year increase in maternal age.)1-0.55) for older mothers.
+    
+    - Significant (p < 0.010).
+    
+  - Gestational age (Z):
+  
+    - Estimate = 3.2479: Higher gestational age strongly increases the odds of child survival.
+    
+    - Odds Ratio = 25.74: For a longer gestational age, the odds of child survival increase by 2574%.
+    
+    - Highly significant (p < 0.001).
+    
+### Conclusion:
+
+The logistic regression analysis provides valuable insight into the factors influencing child survival. The significan predictors in the model are Mother's age and Gestational age, which have a significant impact on child survival odds.
+
+- Mother's age: Older mothers have lower odds of child survival, with a 45% decrease in odds for each year increase in maternal age.
+
+- Gestational age: Longer gestational age significantly increases the odds of child survival, with a 2574% increase in odds for each additional day of gestation.
+
+- Model fit: The model shows a significant reduction in deviance from the null model, indicating a good fit. The AIC value of 1097.6 suggests that the model is relatively simple and provides a good balance between fit and complexity.
+  
+While smoking habits were not statistically significant in this analysis, further research may be needed to explore the impact of smoking on child survival in more detail.
+  
+  
+  
+  
+  
+  
+  
