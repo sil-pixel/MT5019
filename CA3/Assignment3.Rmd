@@ -1,5 +1,5 @@
 ---
-title: "AssignmentIII"
+title: "Assignment III"
 subtitle: "Log-Linear Models"
 author: "Silpa Soni Nallacheruvu (19980824-5287) Hernan Aldana (20000526-4999)"
 date: "`r Sys.Date()`"
@@ -54,9 +54,11 @@ kable(data, caption = "Data from the study on the association of variables with 
 **4. Model Comparison:**
 
 - We compared the models using deviance, degrees of freedom, p-value, and AIC (Akaike Information Criterion) to evaluate the goodness of fit and complexity of the models.
-- We calculated the p-value using the chi-square distribution calculated from the deviance and degrees of freedom.
+- We calculated the p-value using the chi-square distribution calculated from the deviance and degrees of freedom since the deviance is derived from likelihood ratio statistic and it asympotically follows a chi-square distribution.
 
 ### R Output:
+
+The following table contains the least and highest AIC models with their corresponding deviance, degrees of freedom, p-value, and AIC values for each combination of interactions.
 
 ```{r echo=FALSE, message=FALSE}
 
@@ -158,7 +160,7 @@ kable(model_results, caption = "Model Comparison Results", align = c("l", "c", "
 **1. Trends in AIC Across Models:**
 
   - Models with only main effects or single two-way interactions have high AICs, indicating poor fit.
-  - Removing specific two-way and three-way interactions significantly increases the AIC, highlighting the importance of these interaction terms for explaining the data.
+  - Removing specific two-way and three-way interactions, such as ZV or XZV, significantly increases the AIC, highlighting the importance of these interaction terms for explaining the data.
   - The model with the lowest AIC is the one with interactions XY, XZ, XV, YV, ZV, suggesting it balances goodness-of-fit and model complexity most effectively. This model includes all two-way interactions except YZ, capturing significant dependencies among variables while avoiding overfitting. 
 
 **2. Impact of Higher-Order Interactions:**
@@ -168,6 +170,12 @@ kable(model_results, caption = "Model Comparison Results", align = c("l", "c", "
   - The differences in the degrees of freedom in the same order interactions is caused due to the repeated use of one variable in the interaction terms and in turn, causing the missing effect of one or more variables in the model.
   - The deviance of the models has an increasing trend as the number of interactions decreased, indicating that the model fit is getting worse as the interactions are removed.
   
+
+### Interpretation:
+
+  - Adding three-way interactions increases the number of parameters dramatically. 
+  - For categorical variables like Mother’s Age, Smoking Habits, and Gestational Age, a two-way interaction like Smoking Habits $\times$ Gestational Age may explain most of the variation in child survival, while the three-way interaction Mother’s Age $\times$ Smoking Habits $\times$ Gestational Age contributes very little.
+  - In practice, three-way interactions between variables like Mother’s Age, Smoking Habits, and Gestational Age often have small or negligible effects compared to the main effects and two-way interactions.
   
 ## Question2:   
 
@@ -192,7 +200,13 @@ Therefore our focus will be on comparing models based on AIC, p-values, and good
 
 ### LRT Output:
 
-We have chosen the Likelihood Ratio Test due to the nested nature of all models, where each model is a subset of the next model. This test allows us to compare the fit of nested models and determine if the additional parameters in the saturated model significantly improve the fit.
+We have chosen the Likelihood Ratio Test due to the nested nature of all models, where each model is a subset of the next model.
+
+The Null Hypothesis of a LR test ($H_0$) : the reduced model fits the data better than the saturated model.
+
+Alternative Hypothesis ($H_A$) : the saturated model provides a better fit. 
+
+The p-value from the LR test will help us determine if the reduced model is significantly different from the saturated model where we reject the null hypothesis if the p-value is less than the significance level (0.05).
 
 To compare with the saturated model, we have chosen the model with the least AIC from the model comparison results with a p-value of 0.9353 and 6 degrees of freedom. We will compare the saturated model with the chosen model using the Likelihood Ratio Test.
   
@@ -237,9 +251,9 @@ The residual deviance of the reduced model (m1) is slightly higher than the satu
 
 **P-value:**
 
-p-value = 0.9353 (1 - 0.9353 = 0.0647)
+p-value = 0.9353
 
-The p-value from the Likelihood Ratio Test is 0.0647, which is greater than the statistical significant level 0.05. This indicates that the reduced model (m1) is not significantly different from the saturated model. This suggests that the reduced model is adequate, provides a good fit without losing significant explanatory power and the additional complexity of the saturated model is not justified.
+The p-value from the Likelihood Ratio Test is 0.9353, which is greater than the statistical significant level 0.05. This indicates that the reduced model (m1) is a better fit compared to the saturated model (msat). The reduced model captures the essential relationships between variables while maintaining simplicity and interpretability.
 
 ## Question3:
 
@@ -328,6 +342,8 @@ Fit a logistic regression model for the probability of child survival as a funct
   - Set Child Survival (V) as the response variable.
   
   - Use Mother's age (X), Smoking habits (Y), and Gestational age (Z) as explanatory variables.
+  
+  - Expanded the dataset into a binary response table based on the frequency of the child survival data to fit the logistic regression model.
   
 - Fit the logistic Regression Model:
 
@@ -468,8 +484,28 @@ kable(comparison_results, caption = "Comparison of Estimates and Standard Errors
 
 ### Interpretation:
 
-- The estimates and standard errors for Mother's age, Smoking habits, and Gestational age and the interaction variables are consistent between the two models, indicating that the relationship between these variables and child survival is accurately captured by both models.
-- The comparison of estimates and standard errors confirms that the log-linear and logistic regression models provide identical estimates and standard errors for the corresponding parameters, demonstrating the consistency and reliability of the results.
+While the estimation process is similar, the interpretation of parameters differs:
 
+  - Logistic Regression: Coefficients represent changes in the log-odds of the child survival (binary outcome).
+  - Log-Linear Models: Coefficients represent changes in the log of expected counts.
+
+### Why Both Models Yield Consistent Estimates:
+
+  - Both models rely on MLE, which is consistent and asymptotically efficient under regularity conditions.
+  - The estimates and standard errors are derived using the Fisher information matrix, which is valid for both models.
+  - Shared statistical frameworks (GLMs) ensure similar estimation methodologies, leading to consistent results.
   
+### Justification:
+
+  - Both the log-linear model and logistic regression model could be used to analyze the relationship between categorical variables and child survival.
+  - The comparison of estimates and standard errors between the two models confirms that they yield identical results, providing consistent and reliable estimates of the relationships between variables.   
   
+**Strengths of Log-Linear Models:**
+
+  - Ideal for exploring associations and interactions in multidimensional contingency tables.
+  - Can handle higher-order interactions (e.g., three-way or four-way interactions) effectively.
+
+**Strengths of Logistic Regression:** 
+
+  - Better suited for predicting probabilities or understanding direct effects on a binary outcome.
+  - More interpretable when the focus is on one specific outcome (e.g., child survival).
