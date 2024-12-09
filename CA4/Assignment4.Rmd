@@ -153,3 +153,52 @@ final_results
 The selected model indicates that factors such as concsiousness level, type of admission, age, cancer, blood carbon dioxide, and blood pH are significant predictors of survival. Patients who are unconscious, have acute admissions, are older, have cancer, and have abnormal blood gas levels are at higher risk of not surviving. These results can help identify high-risk patients and improve treatment strategies to increase survival rates.
 
 
+## Question 2
+
+How well does your chosen model fit the data? In assignment 3, deviance was used to assess model fit. However, for individual-level data, deviance is unsuitable. Instead, perform the Hosmer-Lemeshow goodness-of-fit test using the recommended R code.
+
+### Approach:
+
+- Understand the Hosmer-Lemeshow Test:
+
+  - The Hosmer-Lemeshow test evaluates wether the observed event rates mateches the expected probabilities predicted by the model.
+  
+  - The null hypothesis is that the model fits the data well (a high p-value suggests no evidence of poor fit).
+
+- Implementation
+
+  - We have ot use te function for the test ResourceSelection::hoslem.test()
+  
+  - We have to specify the predicted probabilities from the final model and the actual outcomes. (m_step and Survival respectively).
+  
+  - Set the number of groups for grouping observation 
+  
+### Code and results :
+```{r echo=FALSE}
+# Calculate predicted probabilities
+predicted_probs <- predict(m_step, type = "response")
+
+# Perform Hosmer-Lemeshow goodness-of-fit test
+hoslem_test <- ResourceSelection::hoslem.test(data_ca4$Survival, predicted_probs, g = 10)
+
+# Display test results
+hoslem_test
+```
+
+**Hosmer-Lemeshow Test Results:**
+
+  - Test Statistic ($\chi^2$): 3.2956
+  
+  - Degrees of Freedom: 8
+  
+  - p-value: 0.9145
+  
+**Interpretation:**
+
+  1. The p-value of 0.9145 tells us not reject the null hypothesis that the model fits the data well. 
+  
+### Conclusion:
+
+The Hosmer-Lemeshow test indicates that the model fits the data well. The observed event rates are consistent with the expected probabilities predicted by the model. This suggests that the model is a good fit for the data and can be used to make accurate predictions about survival probabilities.
+
+
