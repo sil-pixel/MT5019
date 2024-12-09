@@ -15,95 +15,141 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ##  Question 1
 
-Identify factors that affect the probability of not surviving.
+Report the model selection process briefly. Based on your chosen model, which factors affect the probability of not surviving? Report odds ratios with confidence intervals for the most important variables/factors, and interpret them. Use the variable names from the table (not V3, V4, etc.).
 
 ### Approach:
 
-- Prepare the data by combining categories fo selected variables.
+- Model Selection Process:
 
-- Fit an empty model (intercept only) and a full model (all predictors).
+  - Use a stepwise selection with AIC to identify a parsimonious model.
+  
+-	Analysis of the Final Model:
+  
+  - Extract coefficients, odds ratios, and their 95% confidence intervals for significant variables.
+  
+  -Ensure variable names are replaced with their descriptions (e.g., Age, Sex, etc.) instead of column names.
 
-- Perform a step wise variable selection to identify the best model.
-
-- Identify significant predictors and compute the odds ratios and confidence intervals.
-
-- Interpret the results.
+- Interpretation:
+  
+  - Interpret the results form the AIC, odds ratios, and confidence intervals, to determine the best model.
 
 ### Code and results :
 
 ```{r echo=FALSE}
-# Data Preparation
-data4$v5[data4$v5 > 1] <- 0  # Combine categories for v5
+library(dplyr)
+data_ca4 <- read.csv("data_ca4.csv")
 
-# Empty and Full Models
-m_empty <- glm(v2 ~ 1, family = binomial, data = data4)  # Empty model
-m_full <- glm(v2 ~ ., family = binomial, data = data4)   # Full model
-
-# Stepwise Selection (AIC)
-mstep3_AIC <- step(m_full, direction = "both", trace = FALSE)  # Both directions
-
-# Summary of Final Model
-summary(mstep3_AIC)
-
-# Odds Ratios and Confidence Intervals
-odds_ratios <- exp(coef(mstep3_AIC))
-conf_intervals <- exp(confint(mstep3_AIC))
-
-# Create a table
-library(knitr)
-summary_table <- data.frame(
-  Predictor = names(odds_ratios),
-  Odds_Ratio = odds_ratios,
-  CI_Lower = conf_intervals[, 1],
-  CI_Upper = conf_intervals[, 2]
+# Rename variables for clarity
+colnames(data_ca4) <- c(
+  "Patient", "Survival", "Age", "Sex", "Ethnicity", "TreatmentAtAdmission",
+  "Cancer", "PreviousKidneyFailure", "Infection", "HeartLungTreatment",
+  "BloodPressure", "HeartRate", "AdmittedToICUWithin6Months",
+  "TypeOfAdmission", "FractureOfNeckOrSpine", "BloodOxygen",
+  "BloodPH", "BloodCarbonDioxide", "BloodBicarbonate",
+  "BloodCreatine", "ConsciousnessLevel"
 )
-kable(summary_table, caption = "Odds Ratios and Confidence Intervals for Final Model")
+
+# Combine categories for Ethnicity (example)
+data_ca4$Ethnicity[data_ca4$Ethnicity > 1] <- 0
+
+# Fit models
+m_empty <- glm(Survival ~ 1, family = binomial, data = data_ca4)   # Empty model
+m_full <- glm(Survival ~ ., family = binomial, data = data_ca4)    # Full model
+
+# Stepwise model selection using AIC
+m_step <- step(m_empty, scope = list(lower = m_empty, upper = m_full), direction = "both", trace = FALSE)
+
+# Summary of the final model
+summary(m_step)
+
+# Extract Odds Ratios and Confidence Intervals
+odds_ratios <- exp(coef(m_step))  # Odds Ratios
+conf_intervals <- exp(confint(m_step))  # 95% Confidence Intervals
+
+# Combine results into a data frame for clarity
+results <- data.frame(
+  Variable = names(odds_ratios),
+  OddsRatio = odds_ratios,
+  `CI Lower` = conf_intervals[, 1],
+  `CI Upper` = conf_intervals[, 2]
+)
+
+# Filter significant variables (p-value < 0.05)
+significant_vars <- summary(m_step)$coefficients
+significant_vars <- significant_vars[significant_vars[, 4] < 0.05, ]
+
+# Final table for reporting
+final_results <- results %>%
+  filter(Variable %in% rownames(significant_vars))
+
+final_results
 ```
 
 ### Conclusion :
 
-** Model selection **
+**Model selection**
 
-- Through stepwise variable selection using AIC, to identify the best model for predicting survival. The final model included the following variables as significant predictors for survival:
+- From the output the final model includes the following variables: ConsciousnessLevel, TypeOfAdmission, Age, Cancer, Patient, BloodCarbonDioxide, BloodPH, and BloodPressure.
 
-  - v1 (Patient):
+- These variables where selected using a stepwise AIC, which ensures a balance between model complexity and goodness of fit.
+
+**Significant Variables **
+
+- Variables with a p-value < 0.05 are considered significant predictors of survival
+
+  - ConsciousnessLevel
   
-  - v3 (Age):
+  - TypeOfAdmission
   
-  - v7 (Heart_lung_treatment)
+  - Age
   
-  - v14
+  - Cancer
+  
+  - BloodCarbonDioxide, 
+  
+  - BloodPH
+
+**Odds Ratios and Confidence Intervals:**
 
 
+1. ConsciousnessLevel: 
 
+   - Odds Ratio: 13.75 (CI: 4.31-65.28)
+   
+   - Patients who are unconscious or in a coma have a significantly higher probability of not surviving compared to those who are conscious.
+   
+2. TypeOfAdmission:
 
+   - Odds Ratio: 21.25 (CI: 4.36-189.15)
+   
+   - Acute admissions are associated with a significantly higher probability of not surviving compared to non-acute admissions.
+   
+3. Age:
 
+   - Odds Ratio: 1.04 (CI: 1.01-1.07)
+   
+   - For each additional year of age, the odds of not surviving increase by 4%.
 
+4. Cancer:
 
+   - Odds Ratio: 10.37 (CI: 1.95-66.54)
+   
+   - Patients with cancer have over 10 times higher odds of not surviving compared to those without cancer.
+   
+5. BloodCarbonDioxide:
 
-```{r echo=FALSE}
-# Empty model (intercept only)
-m_empty <- glm(v2 ~ 1, family = binomial, data = data4)
+   - Odds Ratio: 0.085 (CI: 0.008-0.55)
+   
+   - Lower blood carbon dioxide levels significantly reduce the odds of not surviving.
+  
+6. BloodPH:
 
-# Full model (all predictors)
-m_full <- glm(v2 ~ ., family = binomial, data = data4)
+   - Odds Ratio: 8.07 (CI: 1.4-53.60)
+   
+   - Lower blood pH levels significantly increase the odds of not surviving.
 
-# Display the summary of the full model to check all predictors
-summary(m_full)
-```
+### Conclusion:
 
-```{r echo=FALSE}
-# Perform stepwise variable selection
-library(MASS) # for stepAIC function
-stepwise_model <- stepAIC(logistic_model, direction = "both")
-
-# Summarize the final model
-summary(stepwise_model)
-
-```
-
-## Output : 
-
-## Observation : 
+The selected model indicates that factors such as concsiousness level, type of admission, age, cancer, blood carbon dioxide, and blood pH are significant predictors of survival. Patients who are unconscious, have acute admissions, are older, have cancer, and have abnormal blood gas levels are at higher risk of not surviving. These results can help identify high-risk patients and improve treatment strategies to increase survival rates.
 
 
