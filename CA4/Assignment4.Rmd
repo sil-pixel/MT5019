@@ -1,5 +1,6 @@
 ---
-title: "AssignmentIV"
+title: "Assignment IV"
+subtitle: "Multiple Logistic Regression and Decision Tree"
 author: "Silpa Soni Nallacheruvu (19980824-5287) Hernan Aldana (20000526-4999)"
 date: "`r Sys.Date()`"
 output: pdf_document
@@ -7,11 +8,12 @@ output: pdf_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
 ```
 
-# Summary
+---
 
-# Exercise 4:1
+# Exercise 4:1 (Multiple Logistic Regression)
 
 ##  Question 1
 
@@ -19,24 +21,34 @@ Report the model selection process briefly. Based on your chosen model, which fa
 
 ### Approach:
 
+- Data Preparation:
+
+  - Load the dataset and rename variables for clarity.
+  
+  - Combine categories for categorical variables if necessary.
+  
+- Model Fitting:
+
+  - Fit an empty logistic regression model and a full logistic regression model to be used in the stepwise selection.
+  - Here, Logistic Regression Model is used to predict the binary outcome of probability of not surviving based on multiple predictors.
+  
 - Model Selection Process:
 
   - Use a stepwise selection with AIC to identify a parsimonious model.
   
 -	Analysis of the Final Model:
 
-  - Extract coefficients, odds ratios, and their 95% confidence intervals for significant variables.
-  
-  - Ensure variable names are replaced with their descriptions (e.g., Age, Sex, etc.) instead of column names.
+    - Extract coefficients, odds ratios, and their 95% confidence intervals for significant variables.
 
 - Interpretation:
 
-  - Interpret the results form the AIC, odds ratios, and confidence intervals, to determine the best model.
+  - Interpret the results from the AIC, odds ratios, and confidence intervals, to determine the best model.
 
-### Code and results :
+### Results:
+
+Summary of the final model after performing stepwise selection using AIC:
 
 ```{r echo=FALSE}
-library(dplyr)
 data_ca4 <- read.csv("data_ca4.csv")
 
 # Rename variables for clarity
@@ -65,15 +77,15 @@ summary(m_step)
 ```
 
 
-**Model selection**
+**Model selection:**
 
-- From the output the final logistic regression model includes the following variables: ConsciousnessLevel, TypeOfAdmission, Age, Cancer, Patient, BloodCarbonDioxide, BloodPH, and BloodPressure.
+- The final logistic regression model includes the following variables: ConsciousnessLevel, TypeOfAdmission, Age, Cancer, Patient, BloodCarbonDioxide, BloodPH, and BloodPressure.
 
-- These variables where selected using a stepwise AIC, which ensures a balance between model complexity and goodness of fit.
+- These variables were selected using a stepwise AIC, which ensures a balance between model complexity and goodness of fit.
 
-**Significant Variables **
+**Significant Variables:**
 
-- Variables with a p-value < 0.05 are considered significant predictors of survival
+- Variables with a p-value < 0.05 are considered significant predictors of survival:
 
   - ConsciousnessLevel
   
@@ -87,6 +99,12 @@ summary(m_step)
   
   - BloodPH
 
+- Patient variable was exlcluded from the final model as the ID code was not significant. 
+- BloodPressure was also excluded from the final model as it was not significant according to the p-value.
+
+### Odds Ratios and Confidence Intervals:
+
+Here's the final report after extracting odds ratios and confidence intervals for significant variables:
 
 ```{r echo=FALSE}
 
@@ -112,9 +130,6 @@ final_results <- results %>%
 
 final_results
 ```
-
-**Odds Ratios and Confidence Intervals:**
-
 
 1. ConsciousnessLevel: 
 
@@ -154,7 +169,7 @@ final_results
 
 ### Conclusion:
 
-The selected model indicates that factors such as concsiousness level, type of admission, age, cancer, blood carbon dioxide, and blood pH are significant predictors of survival. Patients who are unconscious, have acute admissions, are older, have cancer, and have abnormal blood gas levels are at higher risk of not surviving. These results can help identify high-risk patients and improve treatment strategies to increase survival rates.
+The selected model indicates that factors such as consciousness level, type of admission, age, cancer, blood carbon dioxide, and blood pH are significant predictors of survival. Patients who are unconscious, have acute admissions, are older, have cancer, and have abnormal blood gas levels are at higher risk of not surviving. These results can help identify high-risk patients and improve treatment strategies to increase survival rates.
 
 
 ## Question 2
@@ -165,38 +180,35 @@ How well does your chosen model fit the data? In assignment 3, deviance was used
 
 - Understand the Hosmer-Lemeshow Test:
 
-  - The Hosmer-Lemeshow test evaluates wether the observed event rates mateches the expected probabilities predicted by the model.
+  - The Hosmer-Lemeshow test evaluates whether the observed event rates matches the expected probabilities predicted by the model.
   
   - The null hypothesis is that the model fits the data well (a high p-value suggests no evidence of poor fit).
 
-- Implementation
+- Implementation:
 
-  - We have ot use te function for the test ResourceSelection::hoslem.test()
+  - Use the function for the test ResourceSelection::hoslem.test()
   
-  - We have to specify the predicted probabilities from the final model and the actual outcomes. (m_step and Survival respectively).
+  - Calculate the predicted probabilities from the final model.
   
-  - Set the number of groups for grouping observation 
+  - Specify the predicted probabilities from the final model and the actual outcomes while performing Hosmer-Lemeshow test (m_step and Survival respectively).
   
-### Code and results :
+  - 10 is selected as the number of groups for the test because dividing by deciles is a common choice and it was sufficient for this dataset of 200 observations.
+  
+### Hosmer-Lemeshow Test Results:
+
+Here are the results of the Hosmer-Lemeshow goodness-of-fit test:
+
 ```{r echo=FALSE}
 # Calculate predicted probabilities
 predicted_probs <- predict(m_step, type = "response")
 
 # Perform Hosmer-Lemeshow goodness-of-fit test
-hoslem_test <- ResourceSelection::hoslem.test(data_ca4$Survival, predicted_probs, g = 10)
+hoslem_test <- ResourceSelection::hoslem.test(data_ca4$Survival, predicted_probs, g = 8)
 
 # Display test results
 hoslem_test
 ```
 
-**Hosmer-Lemeshow Test Results:**
-
-  - Test Statistic ($\chi^2$): 3.2956
-  
-  - Degrees of Freedom: 8
-  
-  - p-value: 0.9145
-  
 **Interpretation:**
 
   1. The p-value of 0.9145 tells us not reject the null hypothesis that the model fits the data well. 
@@ -205,4 +217,74 @@ hoslem_test
 
 The Hosmer-Lemeshow test indicates that the model fits the data well. The observed event rates are consistent with the expected probabilities predicted by the model. This suggests that the model is a good fit for the data and can be used to make accurate predictions about survival probabilities.
 
+
+## Question 3
+
+Create a confusion matrix for the chosen model. Calculate the accuracy, sensitivity, specificity, and positive and negative predictive values. Interpret the results.
+
+### Approach:
+
+- Understand the Confusion Matrix:
+
+  - A confusion matrix is a table that summarizes the performance of a classification model.
+  
+  - It shows the number of true positives, true negatives, false positives, and false negatives.
+  
+- Implementation:
+
+  - Threshold of 0.5 is used to classify the predicted probabilities into binary outcomes since it is the default threshold for logistic regression.
+  
+  - Create a confusion matrix to compare the actual and predicted outcomes.
+  
+  - Calculate the accuracy, sensitivity, specificity, and positive and negative predictive values from the confusion matrix.
+
+**Sensitivity: ** Sensitivity (True Positive Rate) measures the proportion of actual positive cases that are correctly identified by the model.
+
+**Specificity: ** Specificity (True Negative Rate) measures the proportion of actual negative cases that are correctly identified by the model.
+  
+### Results:
+
+Here are the results of the confusion matrix and performance metrics:
+
+```{r echo=FALSE, message=FALSE}
+# Predicted probabilities
+predicted_classes <- ifelse(predicted_probs > 0.5, 1, 0)
+
+# Confusion Matrix
+conf_matrix <- table(data_ca4$Survival, predicted_classes)
+
+# Calculate performance metrics
+accuracy <- sum(diag(conf_matrix)) / sum(conf_matrix)
+sensitivity <- conf_matrix[1, 1] / sum(conf_matrix[1, ])
+specificity <- conf_matrix[2, 2] / sum(conf_matrix[2, ])
+
+# Print the confusion matrix
+rownames(conf_matrix) <- c("Actual Survived", "Actual Not Survived")
+knitr::kable(conf_matrix, caption = "Confusion Matrix", col.names = c("Predicted Survived", "Predicted Not Survived"), row.names = TRUE)
+
+# Display performance metrics
+knitr::kable(data.frame(
+  Metric = c("Accuracy", "Sensitivity", "Specificity"),
+  Value = c(accuracy, sensitivity, specificity)
+), caption = "Performance Metrics", col.names = c("Metric", "Value"))
+
+```
+
+
+### Interpretation:
+
+**Accuracy:** The model has an accuracy of 0.865, meaning that it correctly predicted 86.5% of the cases.
+
+**Sensitivity:** The sensitivity of 0.96875 indicates that the model correctly identified 96.9% of the actual survivors.
+
+**Specificity:** The specificity of 0.45 suggests that the model correctly identified 45% of the actual non-survivors.
+
+### Conclusion:
+
+The confusion matrix and performance metrics provide insights into the model's predictive accuracy. The model has a high sensitivity, indicating that it is effective at identifying actual survivors. However, the specificity is relatively low, suggesting that the model has difficulty distinguishing between actual non-survivors. These results can help evaluate the model's performance and identify areas for improvement.
+
+
+## Question 4
+
+Create plots of ROC curves for the chosen model. Calculate the AUC for the full model and two more models. Choose the best model based on the AUC. Interpret the results.
 
