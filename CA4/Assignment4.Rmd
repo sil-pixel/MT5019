@@ -24,13 +24,13 @@ Report the model selection process briefly. Based on your chosen model, which fa
   - Use a stepwise selection with AIC to identify a parsimonious model.
   
 -	Analysis of the Final Model:
-  
+
   - Extract coefficients, odds ratios, and their 95% confidence intervals for significant variables.
   
-  -Ensure variable names are replaced with their descriptions (e.g., Age, Sex, etc.) instead of column names.
+  - Ensure variable names are replaced with their descriptions (e.g., Age, Sex, etc.) instead of column names.
 
 - Interpretation:
-  
+
   - Interpret the results form the AIC, odds ratios, and confidence intervals, to determine the best model.
 
 ### Code and results :
@@ -62,6 +62,34 @@ m_step <- step(m_empty, scope = list(lower = m_empty, upper = m_full), direction
 # Summary of the final model
 summary(m_step)
 
+```
+
+
+**Model selection**
+
+- From the output the final logistic regression model includes the following variables: ConsciousnessLevel, TypeOfAdmission, Age, Cancer, Patient, BloodCarbonDioxide, BloodPH, and BloodPressure.
+
+- These variables where selected using a stepwise AIC, which ensures a balance between model complexity and goodness of fit.
+
+**Significant Variables **
+
+- Variables with a p-value < 0.05 are considered significant predictors of survival
+
+  - ConsciousnessLevel
+  
+  - TypeOfAdmission
+  
+  - Age
+  
+  - Cancer
+  
+  - BloodCarbonDioxide, 
+  
+  - BloodPH
+
+
+```{r echo=FALSE}
+
 # Extract Odds Ratios and Confidence Intervals
 odds_ratios <- exp(coef(m_step))  # Odds Ratios
 conf_intervals <- exp(confint(m_step))  # 95% Confidence Intervals
@@ -84,30 +112,6 @@ final_results <- results %>%
 
 final_results
 ```
-
-### Conclusion :
-
-**Model selection**
-
-- From the output the final model includes the following variables: ConsciousnessLevel, TypeOfAdmission, Age, Cancer, Patient, BloodCarbonDioxide, BloodPH, and BloodPressure.
-
-- These variables where selected using a stepwise AIC, which ensures a balance between model complexity and goodness of fit.
-
-**Significant Variables **
-
-- Variables with a p-value < 0.05 are considered significant predictors of survival
-
-  - ConsciousnessLevel
-  
-  - TypeOfAdmission
-  
-  - Age
-  
-  - Cancer
-  
-  - BloodCarbonDioxide, 
-  
-  - BloodPH
 
 **Odds Ratios and Confidence Intervals:**
 
