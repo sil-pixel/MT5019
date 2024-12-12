@@ -300,7 +300,9 @@ Create plots of ROC curves for the chosen model. Calculate the AUC for the full 
 
   - Compare the AUC values for the full model and two additional models  and the model with the highest AUC is considered the best model for predicting survival probabilities.
 
-  - The two additional models used for comparison with the full model are derived by removing non-significant variables from the full model (such as Patient ID and Blood Pressure as mentioned in Q1).
+  - The two additional models used for comparison with the full model are derived by removing a significant variable and a non-significant variable from the full model (such as ConsciousnessLevel and Blood Pressure as mentioned in Q1).
+  
+  - Thereby, we can compare the significance of these variables in predicting survival probabilities by observing the change in AUC values using ROC curves.
   
       - Full Model: 
       
@@ -310,9 +312,9 @@ Create plots of ROC curves for the chosen model. Calculate the AUC for the full 
 
       $Survival \sim ConsciousnessLevel + TypeOfAdmission + Age + Cancer + BloodCarbonDioxide + BloodPH + Patient$
       
-      - Model B : Exclude Patient ID from the full model.
+      - Model B : Exclude ConsciousnessLevel from the full model.
 
-      $Survival \sim ConsciousnessLevel + TypeOfAdmission + Age + Cancer + BloodCarbonDioxide + BloodPH + BloodPressure$
+      $Survival \sim TypeOfAdmission + Age + Cancer + BloodCarbonDioxide + BloodPH + Patient + BloodPressure$
   
 ### Results:
 
@@ -322,15 +324,19 @@ library(pROC)
 full_model_roc <- roc(data_ca4$Survival, predicted_probs)
 plot(full_model_roc, col = "blue", main = "ROC Curves", legacy.axes = TRUE)
 
+formula_full_model <- "Survival ~ ConsciousnessLevel + TypeOfAdmission + Age + Cancer + Patient + BloodCarbonDioxide + BloodPH + BloodPressure"
+formula_model_a <- "Survival ~ ConsciousnessLevel + TypeOfAdmission + Age + Cancer + BloodCarbonDioxide + BloodPH + Patient"
+formula_model_b <- "Survival ~ TypeOfAdmission + Age + Cancer + BloodCarbonDioxide + BloodPH + Patient + BloodPressure"
+
 # Additional models
-# Model 1: Remove non-significant variables
-m_significant_1 <- glm(Survival ~ ConsciousnessLevel + TypeOfAdmission + Age + Cancer + BloodCarbonDioxide + BloodPH + Patient, family = binomial, data = data_ca4)
+# Model 1: Remove non-significant variable BloodPressure
+m_significant_1 <- glm(formula_model_a, family = binomial, data = data_ca4)
 predicted_probs_significant_1 <- predict(m_significant_1, type = "response")
 significant_model_roc_1 <- roc(data_ca4$Survival, predicted_probs_significant_1)
 plot(significant_model_roc_1, col = "red", add = TRUE, legacy.axes = TRUE)
 
-# Model 2: Use different predictors
-m_significant_2 <- glm(Survival ~ ConsciousnessLevel + TypeOfAdmission + Age + Cancer + BloodCarbonDioxide + BloodPH + BloodPressure, family = binomial, data = data_ca4)
+# Model 2: Remove significant variable ConsciousnessLevel 
+m_significant_2 <- glm(formula_model_b, family = binomial, data = data_ca4)
 predicted_probs_significant_2 <- predict(m_significant_2, type = "response")
 significant_model_roc_2 <- roc(data_ca4$Survival, predicted_probs_significant_2)
 plot(significant_model_roc_2, col = "green", add = TRUE, legacy.axes = TRUE)
@@ -349,8 +355,9 @@ knitr::kable(data.frame(
 ### Interpretation:
 
 - The full model has the highest AUC of 0.873, indicating that it has a better predictive performance for survival probabilities compared to the other models.
-- Model A, which excludes Blood Pressure, has an AUC of 0.871, while Model B, which excludes Patient ID, has an AUC of 0.85, are also quite close to the full model.
-- This can be interpreted as the variables blood pressure and patient ID do not significantly contribute to the predictive power of the patient survival, as their exclusion does not significantly affect the AUC of the model. 
+- Model A, which excludes Blood Pressure, has an AUC of 0.871 is quite close to the full model, whereas Model B, which excludes ConsciousnessLevel, has an AUC of 0.804, which has a bigger difference with full model compared to the Model B.
+- This can be interpreted as Blood Pressure does not significantly contribute to the patient survival prediction, as its exclusion does not significantly affect the AUC of the model.
+- Whereas ConsciousnessLevel is a significant predictor of survival, and its exclusion has a more significant impact on the model's predictive performance.
 - The AUC of all three models are much higher than 0.5 (random guessing) and can be considered effective for predicting survival probabilities, with the full model being the best among them.
 
 ## Question 5
@@ -373,10 +380,6 @@ Perform Leave One Out Cross Validation (LOOCV) for the above full model and the 
 
 # Create a vector for the predicted values
 predprob_LOOCV <- numeric(nrow(data_ca4))  
-
-formula_full_model <- "Survival ~ ConsciousnessLevel + TypeOfAdmission + Age + Cancer + Patient + BloodCarbonDioxide + BloodPH + BloodPressure"
-formula_model_a <- "Survival ~ ConsciousnessLevel + TypeOfAdmission + Age + Cancer + BloodCarbonDioxide + BloodPH + Patient"
-formula_model_b <- "Survival ~ ConsciousnessLevel + TypeOfAdmission + Age + Cancer + BloodCarbonDioxide + BloodPH + BloodPressure"
 
 # function for LOOCV
 loocv <- function(formula) {
@@ -411,10 +414,14 @@ knitr::kable(data.frame(
 
 ### Interpretation:
 
-- According the LOOCV-adjusted AUC values, Model A has the highest AUC of 0.824, followed by the Full Model with an AUC of 0.819, and Model B with an AUC of 0.793.
+- According the LOOCV-adjusted AUC values, Model A has the highest AUC of 0.824, followed by the Full Model with an AUC of 0.819, and Model B with an AUC of 0.756.
 
 - LOOCV-adjusted AUC is a more reliable AUC as it is calculated by leaving out one observation at a time and predicted using the model trained on the remaining data.
 
 - Model A having a higher AUC than full model indicates that the full model was overfitted in the previous analysis, and Model A is the best model for predicting survival probabilities.
 
-- The AUC of Model B has further decreased compared to the previous analysis, suggesting that the previous Model B was also overfitted and that there is a bigger impact in removing the Patient ID variable on the model's predictive performance than previously thought.
+- This means that Blood Pressure is not required to be added as a explanatory variable while predicting the survival probabilities of the patients.
+
+- The AUC of Model B has further decreased compared to the previous analysis, suggesting that the previous Model B was also overfitted and that there is a bigger impact of the ConsciousnessLevel of the patient in predicting their survival than previously thought.
+
+- This signifies that ConsciousnessLevel of the patient is very essential to predict the survival probability.
