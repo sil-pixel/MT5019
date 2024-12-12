@@ -15,7 +15,7 @@ library(dplyr)
 
 ## Overview: 
 
-Analysis of The ICU Study data (Hosmer & Lemeshow (1989): Applied Logistic Regression), with 200 patient records admitted to an Intensive Care Unit (ICU).
+Analysis of The ICU Study data (Hosmer & Lemeshow (1989): Applied Logistic Regression), with 200 patient records admitted to an Intensive Care Unit (ICU) using multiple logistic regression and decision tree models to identify factors that affect the survival of such patients.
 
 # Exercise 4:1 (Multiple Logistic Regression)
 
@@ -238,8 +238,6 @@ Create a confusion matrix for the chosen model. Calculate the accuracy, sensitiv
 
   - Threshold of 0.5 is used to classify the predicted probabilities into binary outcomes since it is the default threshold for logistic regression.
   
-  - Create a confusion matrix to compare the actual and predicted outcomes.
-  
   - Calculate the accuracy, sensitivity, specificity, and positive and negative predictive values from the confusion matrix.
 
 **Sensitivity: ** Sensitivity (True Positive Rate) measures the proportion of actual positive cases that are correctly identified by the model.
@@ -247,8 +245,6 @@ Create a confusion matrix for the chosen model. Calculate the accuracy, sensitiv
 **Specificity: ** Specificity (True Negative Rate) measures the proportion of actual negative cases that are correctly identified by the model.
   
 ### Results:
-
-Here are the results of the confusion matrix and performance metrics:
 
 ```{r echo=FALSE, message=FALSE}
 # Predicted probabilities
@@ -302,15 +298,13 @@ Create plots of ROC curves for the chosen model. Calculate the AUC for the full 
   
 - Implementation:
 
-  - Use the pROC package to create ROC curves and calculate AUC.
-  
-  - Compare the AUC values for the full model and two additional models to determine the best model.
-  
-  - The additional models can be created by removing non-significant variables or using different predictors.
-  
-  - The model with the highest AUC is considered the best model for predicting survival probabilities.
+  - Compare the AUC values for the full model and two additional models  and the model with the highest AUC is considered the best model for predicting survival probabilities.
 
-  - The two additional models we will using for comparison with the full model are derived by removing non-significant variables from the full model (such as Patient ID and Blood Pressure as mentioned in Q1).
+  - The two additional models used for comparison with the full model are derived by removing non-significant variables from the full model (such as Patient ID and Blood Pressure as mentioned in Q1).
+  
+      - Full Model: 
+      
+      $Survival \sim ConsciousnessLevel + TypeOfAdmission + Age + Cancer + BloodCarbonDioxide + BloodPH + Patient + BloodPressure$
   
       - Model A: Exclude Blood Pressure from the full model.
 
@@ -322,7 +316,7 @@ Create plots of ROC curves for the chosen model. Calculate the AUC for the full 
   
 ### Results:
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=6, fig.height=4, fig.align='center'}
 # Load the pROC package
 library(pROC)
 full_model_roc <- roc(data_ca4$Survival, predicted_probs)
@@ -333,13 +327,13 @@ plot(full_model_roc, col = "blue", main = "ROC Curves", legacy.axes = TRUE)
 m_significant_1 <- glm(Survival ~ ConsciousnessLevel + TypeOfAdmission + Age + Cancer + BloodCarbonDioxide + BloodPH + Patient, family = binomial, data = data_ca4)
 predicted_probs_significant_1 <- predict(m_significant_1, type = "response")
 significant_model_roc_1 <- roc(data_ca4$Survival, predicted_probs_significant_1)
-plot(significant_model_roc_1, col = "red", add = TRUE)
+plot(significant_model_roc_1, col = "red", add = TRUE, legacy.axes = TRUE)
 
 # Model 2: Use different predictors
 m_significant_2 <- glm(Survival ~ ConsciousnessLevel + TypeOfAdmission + Age + Cancer + BloodCarbonDioxide + BloodPH + BloodPressure, family = binomial, data = data_ca4)
 predicted_probs_significant_2 <- predict(m_significant_2, type = "response")
 significant_model_roc_2 <- roc(data_ca4$Survival, predicted_probs_significant_2)
-plot(significant_model_roc_2, col = "green", add = TRUE)
+plot(significant_model_roc_2, col = "green", add = TRUE, legacy.axes = TRUE)
 legend("bottomright", legend = c("Full Model", "Model A", "Model B"), col = c("blue", "red", "green"), lty = 1)
 
 # Calculate AUC
@@ -355,10 +349,72 @@ knitr::kable(data.frame(
 ### Interpretation:
 
 - The full model has the highest AUC of 0.873, indicating that it has a better predictive performance for survival probabilities compared to the other models.
-- Model A, which excludes Blood Pressure, has an AUC of 0.871, while Model B, which excludes Patient ID, has an AUC of 0.85, are also quite close to the full model, and much higher than 0.5 (random guessing).
+- Model A, which excludes Blood Pressure, has an AUC of 0.871, while Model B, which excludes Patient ID, has an AUC of 0.85, are also quite close to the full model.
 - This can be interpreted as the variables blood pressure and patient ID do not significantly contribute to the predictive power of the patient survival, as their exclusion does not significantly affect the AUC of the model. 
-- Hence, all three models can be considered effective for predicting survival probabilities, with the full model being the best among them.
+- The AUC of all three models are much higher than 0.5 (random guessing) and can be considered effective for predicting survival probabilities, with the full model being the best among them.
 
 ## Question 5
 
+Perform Leave One Out Cross Validation (LOOCV) for the above full model and the additional models. Calculate the LOOCV-adjusted AUC for the three models and compare with the results from question 4. Which model indicates the best predictive performance?
 
+### Approach:
+
+- Understand Leave One Out Cross Validation (LOOCV):
+
+  - LOOCV is a technique for assessing the predictive performance of a model by training on all but one observation and testing on the left-out observation.
+  
+  - The AUC values from LOOCV provide an estimate of the model's performance on unseen data.
+  
+  - The three models used in question 4 are evaluated using LOOCV to determine the best predictive performance.
+  
+### Results:
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+# Create a vector for the predicted values
+predprob_LOOCV <- numeric(nrow(data_ca4))  
+
+formula_full_model <- "Survival ~ ConsciousnessLevel + TypeOfAdmission + Age + Cancer + Patient + BloodCarbonDioxide + BloodPH + BloodPressure"
+formula_model_a <- "Survival ~ ConsciousnessLevel + TypeOfAdmission + Age + Cancer + BloodCarbonDioxide + BloodPH + Patient"
+formula_model_b <- "Survival ~ ConsciousnessLevel + TypeOfAdmission + Age + Cancer + BloodCarbonDioxide + BloodPH + BloodPressure"
+
+# function for LOOCV
+loocv <- function(formula) {
+  predprob_LOOCV <- numeric(nrow(data_ca4))  
+  for (i in 1:nrow(data_ca4)) {
+    # Create training and validation sets
+    data_training <- data_ca4[-i,]
+    data_validation <- data_ca4[i, ,drop=FALSE]
+    # Fit the model on the training data
+    loocv_model <- glm(formula, family=binomial, data=data_training)
+    # Predict the value for the held-out observation
+    predprob_LOOCV[i] <- predict(loocv_model, newdata = data_validation, type = "response")
+  }
+  return(predprob_LOOCV)
+}
+
+# LOOCV for the full model
+predprob_LOOCV_full_model <- loocv(formula_full_model)
+loocv_full_model_roc <- roc(data_ca4$Survival, predprob_LOOCV_full_model)
+predprob_LOOCV_model_a <- loocv(formula_model_a)
+loocv_model_a_roc <- roc(data_ca4$Survival, predprob_LOOCV_model_a)
+predprob_LOOCV_model_b <- loocv(formula_model_b)
+loocv_model_b_roc <- roc(data_ca4$Survival, predprob_LOOCV_model_b)
+
+# print the results of AUC for three models
+knitr::kable(data.frame(
+  Model = c("Full Model", "Model A", "Model B"),
+  AUC = c(auc(loocv_full_model_roc), auc(loocv_model_a_roc), auc(loocv_model_b_roc))
+), caption = "LOOCV-Adjusted AUC Values", col.names = c("Model", "AUC"))
+```
+
+
+### Interpretation:
+
+- According the LOOCV-adjusted AUC values, Model A has the highest AUC of 0.824, followed by the Full Model with an AUC of 0.819, and Model B with an AUC of 0.793.
+
+- LOOCV-adjusted AUC is a more reliable AUC as it is calculated by leaving out one observation at a time and predicted using the model trained on the remaining data.
+
+- Model A having a higher AUC than full model indicates that the full model was overfitted in the previous analysis, and Model A is the best model for predicting survival probabilities.
+
+- The AUC of Model B has further decreased compared to the previous analysis, suggesting that the previous Model B was also overfitted and that there is a bigger impact in removing the Patient ID variable on the model's predictive performance than previously thought.
