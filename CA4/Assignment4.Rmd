@@ -13,6 +13,10 @@ library(dplyr)
 
 ---
 
+## Overview: 
+
+Analysis of The ICU Study data (Hosmer & Lemeshow (1989): Applied Logistic Regression), with 200 patient records admitted to an Intensive Care Unit (ICU).
+
 # Exercise 4:1 (Multiple Logistic Regression)
 
 ##  Question 1
@@ -287,4 +291,74 @@ The confusion matrix and performance metrics provide insights into the model's p
 ## Question 4
 
 Create plots of ROC curves for the chosen model. Calculate the AUC for the full model and two more models. Choose the best model based on the AUC. Interpret the results.
+
+### Approach:
+
+- Understand ROC Curves and AUC:
+
+  - ROC curves are used to evaluate the performance of classification models by plotting the true positive rate against the false positive rate.
+  
+  - The AUC (Area Under the Curve) summarizes the ROC curve, with higher values indicating better model performance.
+  
+- Implementation:
+
+  - Use the pROC package to create ROC curves and calculate AUC.
+  
+  - Compare the AUC values for the full model and two additional models to determine the best model.
+  
+  - The additional models can be created by removing non-significant variables or using different predictors.
+  
+  - The model with the highest AUC is considered the best model for predicting survival probabilities.
+
+  - The two additional models we will using for comparison with the full model are derived by removing non-significant variables from the full model (such as Patient ID and Blood Pressure as mentioned in Q1).
+  
+      - Model A: Exclude Blood Pressure from the full model.
+
+      $Survival \sim ConsciousnessLevel + TypeOfAdmission + Age + Cancer + BloodCarbonDioxide + BloodPH + Patient$
+      
+      - Model B : Exclude Patient ID from the full model.
+
+      $Survival \sim ConsciousnessLevel + TypeOfAdmission + Age + Cancer + BloodCarbonDioxide + BloodPH + BloodPressure$
+  
+### Results:
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# Load the pROC package
+library(pROC)
+full_model_roc <- roc(data_ca4$Survival, predicted_probs)
+plot(full_model_roc, col = "blue", main = "ROC Curves", legacy.axes = TRUE)
+
+# Additional models
+# Model 1: Remove non-significant variables
+m_significant_1 <- glm(Survival ~ ConsciousnessLevel + TypeOfAdmission + Age + Cancer + BloodCarbonDioxide + BloodPH + Patient, family = binomial, data = data_ca4)
+predicted_probs_significant_1 <- predict(m_significant_1, type = "response")
+significant_model_roc_1 <- roc(data_ca4$Survival, predicted_probs_significant_1)
+plot(significant_model_roc_1, col = "red", add = TRUE)
+
+# Model 2: Use different predictors
+m_significant_2 <- glm(Survival ~ ConsciousnessLevel + TypeOfAdmission + Age + Cancer + BloodCarbonDioxide + BloodPH + BloodPressure, family = binomial, data = data_ca4)
+predicted_probs_significant_2 <- predict(m_significant_2, type = "response")
+significant_model_roc_2 <- roc(data_ca4$Survival, predicted_probs_significant_2)
+plot(significant_model_roc_2, col = "green", add = TRUE)
+legend("bottomright", legend = c("Full Model", "Model A", "Model B"), col = c("blue", "red", "green"), lty = 1)
+
+# Calculate AUC
+auc_full_model <- auc(full_model_roc)
+auc_model_1 <- auc(significant_model_roc_1)
+auc_model_2 <- auc(significant_model_roc_2)
+knitr::kable(data.frame(
+  Model = c("Full Model", "Model A", "Model B"),
+  AUC = c(auc_full_model, auc_model_1, auc_model_2)
+), caption = "AUC Values", col.names = c("Model", "AUC"))
+```
+
+### Interpretation:
+
+- The full model has the highest AUC of 0.873, indicating that it has a better predictive performance for survival probabilities compared to the other models.
+- Model A, which excludes Blood Pressure, has an AUC of 0.871, while Model B, which excludes Patient ID, has an AUC of 0.85, are also quite close to the full model, and much higher than 0.5 (random guessing).
+- This can be interpreted as the variables blood pressure and patient ID do not significantly contribute to the predictive power of the patient survival, as their exclusion does not significantly affect the AUC of the model. 
+- Hence, all three models can be considered effective for predicting survival probabilities, with the full model being the best among them.
+
+## Question 5
+
 
