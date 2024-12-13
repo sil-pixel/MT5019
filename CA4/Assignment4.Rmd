@@ -530,5 +530,65 @@ The tree with cp = 0.01 using Gini Index was selected because it offers a good t
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=8, fig.height=6, fig.align='center'}
 rpart.plot(tm2, main = "Gini, cp = 0.01", digits = 3)
-
 ```
+
+## Question 2
+
+In this question we have to assess how well the chosen tree predicts for Survival, using the AUC metric, to measure predictive performance. Finally we will compare the AUC of the decision tree with the AUC of the logistic regression model.
+
+### Approach:
+
+- **Calculate Predicted Probabilities**:
+  Use the `predict()` function to calculate the predicted probabilities for the chosen decision tree model.
+- **Calculate AUC**:
+  Use the `roc()` function from the `pROC` package to calculate the AUC for the decision tree model.
+- **Logistic Regression Model**:
+  Compare the AUC of the decision tree with the AUC of the logistic regression model to assess predictive performance.
+
+### Results:
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+library(pROC)
+library(kableExtra)
+
+# Predicted probabilities for the decision tree
+pred_tm2 <- predict(tm2, type = "prob")[, 2]  # Probabilities of 'Not Survived'
+
+# AUC for the decision tree
+auc_tm2 <- auc(data_ca4$Survival, pred_tm2)
+
+# Predicted probabilities for the logistic regression model
+pred_logit <- predict(m_step, type = "response") 
+
+# AUC for the logistic regression model
+auc_logit <- auc(data_ca4$Survival, pred_logit)
+# Create the comparison table
+auc_comparison <- data.frame(
+  Model = c("Decision Tree (Gini, cp = 0.01)", "Logistic Regression"),
+  AUC = c(auc_tm2, auc_logit)
+)
+
+# Generate a formatted table
+auc_comparison %>%
+  kbl(caption = "Comparison of AUC Values Between Models") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), 
+                full_width = FALSE, 
+                position = "center") %>%
+  row_spec(1, color = "black", background = "white") %>%
+  row_spec(2, color = "black", background = "white")
+```
+
+1. **Decision Tree AUC**: The decision tree model with Gini Index and cp = 0.01 has an AUC of 0.8118, indicating a good predictive performance.
+
+2. **Logistic Regression AUC**: The logistic regression model has an AUC of 0.8729, which is higher than the decision tree model.
+
+### Interpretation:
+
+1. **Decision Tree vs. Logistic Regression**:
+The decision tree is slightly less accurate but offers interpretability making it a useful option when simplicity is a priority. (For real-time clinical applications)
+
+2. **Logistic Regression**:
+
+Logistic regression achieves higher predictive accuracy, which may be preferable if accuracy outweighs interpretability.
+
+In conclusion based on the AUC values, the logistic regression model is the better-performing model for predicting survival. However, the decision tree remains as a valuable option for its interpretability and simplicity, especially in clinical settings where understanding the decision-making process is crucial.
