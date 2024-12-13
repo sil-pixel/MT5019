@@ -425,3 +425,110 @@ knitr::kable(data.frame(
 - The AUC of Model B has further decreased compared to the previous analysis, suggesting that the previous Model B was also overfitted and that there is a bigger impact of the ConsciousnessLevel of the patient in predicting their survival than previously thought.
 
 - This signifies that ConsciousnessLevel of the patient is very essential to predict the survival probability.
+
+
+
+# Exercise 4:2 (Decision Tree)
+
+## Question 1
+
+Fit a decision tree model to the ICU data using the rpart package. Use the same predictors as in the multiple logistic regression model. Plot the decision tree and interpret the results.
+
+### Approach:
+
+To classify the survival status of patients admitted to the ICU, a decision tree model is applied. Decision trees offer an interpretable way to identify key predictors and their thresholds that affect survival. For this task, the following steps were followed:
+
+1. **Model Fitting**:
+   - A decision tree model was fit using the ICU dataset.
+   - The response variable (`v2`) indicates survival (0 = survived, 1 = not survived).
+   - Predictor variables include age, blood pressure, consciousness level, and other clinical factors.
+
+2. **Parameters Adjusted**:
+   - **Splitting criterion**: Both "information" and "gini" criteria were tested to evaluate their effects on splits.
+   - **Complexity parameter (`cp`)**: Different values were used to control the depth of the tree and prevent overfitting.
+
+3. **Visualization**:
+   - Tree diagrams were created using the `rpart.plot` package to assess the structure and interpretability of the models.
+
+4. **Tree Selection**:
+   - The selecion criteria for the best tree includes:
+   
+     - **Interpretability**: The tree should be easy to interpret and explain. Trees with fewer splits are preferred.
+     - **Relevance of Splits**: Identify important predictors of survival.
+     - **Clinical Relevance**: For ICU patients, identifying key factors affecting survival is crucial.
+
+5. **Variables of Interest**:
+   - **`v21` (Consciousness level)**: The primary variable splitting the data in both trees, indicating its importance for predicting survival.
+   - **`v11` (Blood pressure)**: A secondary variable used in the second tree, capturing further distinctions in survival likelihood.
+
+
+### Results:
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=8, fig.height=6, fig.align='center'}
+
+library(rpart)
+library(rpart.plot)
+
+# The package "rpart.plot" must have been installed
+#Fitting a decision tree model
+tm1 <- rpart(Survival ~.,method = "class", data=data_ca4, parms = list(split = "gini"), cp = 0.1)
+# use split = "gini" or split = "information"
+# cp "complexity parameter" can be adjusted
+
+tm2 <- rpart(Survival ~.,method = "class", data=data_ca4, parms = list(split = "gini"), cp = 0.01)
+
+tm3 <- rpart(Survival ~.,method = "class", data=data_ca4, parms = list(split = "gini"), cp = 0.001)
+
+tm4 <- rpart(Survival ~.,method = "class", data=data_ca4, parms = list(split = "information"), cp = 0.1)
+
+tm5 <- rpart(Survival ~.,method = "class", data=data_ca4, parms = list(split = "information"), cp = 0.01)
+
+tm6 <- rpart(Survival ~.,method = "class", data=data_ca4, parms = list(split = "information"), cp = 0.001)
+
+
+# Set up a multi-panel layout with 3 rows and 2 columns
+par(mfrow = c(3, 2), mar = c(4, 4, 2, 1))  # 3 rows, 2 columns, adjust margins for spacing
+
+# Plot each pair of trees side by side
+rpart.plot(tm1, main = "Gini, cp = 0.1", digits = 3)
+rpart.plot(tm4, main = "Info Gain, cp = 0.1", digits = 3)
+
+rpart.plot(tm2, main = "Gini, cp = 0.01", digits = 3)
+rpart.plot(tm5, main = "Info Gain, cp = 0.01", digits = 3)
+
+rpart.plot(tm3, main = "Gini, cp = 0.001", digits = 3)
+rpart.plot(tm6, main = "Info Gain, cp = 0.001", digits = 3)
+
+# Reset layout to default
+par(mfrow = c(1, 1))
+```
+### Interpretation and selection:
+
+**Simplicity and Predictors**
+- All trees highlight Consciousness Level as the primary predictor of survival.
+- Trees with cp = 0.1 are the simplest, making them easy to interpret, but they do not refine predictions beyond the primary split.
+- Trees with cp = 0.01 add an extra split, offering more detailed classification without ading excessive copmplexity.
+- Trees with cp = 0.001 are the most complex, with multiple splits that may lead to overfitting.
+
+**Compare splitting Criteria**
+- **Gini index** tends to favor splits with balanced distributions of the target classes, which may better handle uncertainty in clinical settings.
+- **Information gain** focuses on maximizing the reduciton in entropy, which could lead to splits that are sightly more biased but more efficient for some datasets.
+
+**Simplicity vs refinement**
+- a tree with cp = 0.01is a good compromise, as it adds refinement without sacrificing interpretability, and without risking overfitting.
+- Among the spliting methods with same cp, the preference depends on the dataset:
+
+  - If the data has imbalanced calsses, gini might be better.
+  - If entropy reduction is preferred, Information could perform better.
+  
+### Conclusion:
+
+Based on the uploading plots and logic: 
+
+- **Best tree:** Gini, cp=0.01.
+The tree with cp = 0.01 using Gini Index was selected because it offers a good trade-off between interpretability and predictive refinement. Consciousness Level remains the primary driver of survival predictions, while the additional split on Blood Pressure refines subgroups with varying survival probabilities. This tree is simple enough for clinical use while providing actionable insights.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=8, fig.height=6, fig.align='center'}
+rpart.plot(tm2, main = "Gini, cp = 0.01", digits = 3)
+
+```
