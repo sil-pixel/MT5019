@@ -255,12 +255,12 @@ conf_matrix <- table(data_ca4$Survival, predicted_classes)
 
 # Calculate performance metrics
 accuracy <- sum(diag(conf_matrix)) / sum(conf_matrix)
-sensitivity <- conf_matrix[1, 1] / sum(conf_matrix[1, ])
-specificity <- conf_matrix[2, 2] / sum(conf_matrix[2, ])
+specificity <- conf_matrix[1, 1] / sum(conf_matrix[1, ])
+sensitivity <- conf_matrix[2, 2] / sum(conf_matrix[2, ])
 
 # Print the confusion matrix
-rownames(conf_matrix) <- c("Actual Survived", "Actual Not Survived")
-knitr::kable(conf_matrix, caption = "Confusion Matrix", col.names = c("Predicted Survived", "Predicted Not Survived"), row.names = TRUE)
+rownames(conf_matrix) <- c("Actual Not Survived", "Actual Survived")
+knitr::kable(conf_matrix, caption = "Confusion Matrix", col.names = c("Predicted Not Survived", "Predicted Survived"), row.names = TRUE)
 
 # Display performance metrics
 knitr::kable(data.frame(
@@ -275,13 +275,13 @@ knitr::kable(data.frame(
 
 **Accuracy:** The model has an accuracy of 0.865, meaning that it correctly predicted 86.5% of the cases.
 
-**Sensitivity:** The sensitivity of 0.96875 indicates that the model correctly identified 96.9% of the actual survivors.
+**Sensitivity:** The sensitivity of 0.45 indicates that the model correctly identified 45% of the actual survivors.
 
-**Specificity:** The specificity of 0.45 suggests that the model correctly identified 45% of the actual non-survivors.
+**Specificity:** The specificity of 0.96875 suggests that the model correctly identified 96.9% of the actual non-survivors.
 
 ### Conclusion:
 
-The confusion matrix and performance metrics provide insights into the model's predictive accuracy. The model has a high sensitivity, indicating that it is effective at identifying actual survivors. However, the specificity is relatively low, suggesting that the model has difficulty distinguishing between actual non-survivors. These results can help evaluate the model's performance and identify areas for improvement.
+The confusion matrix and performance metrics provide insights into the model's predictive accuracy. The model has a specificity, indicating that it is highly effective at identifying non-survivors. However, the sensitivity is relatively low, suggesting that the model has difficulty identifying actual survivors. The results tell us that the model can be used for rule-out purposes, but it may not be as effective for rule-in purposes. Further optimization may be needed to improve the model's sensitivity for predicting survivors.
 
 
 ## Question 4
@@ -436,7 +436,7 @@ Fit a decision tree model to the ICU data using the rpart package. Use the same 
 
 ### Approach:
 
-To classify the survival status of patients admitted to the ICU, a decision tree model is applied. Decision trees offer an interpretable way to identify key predictors and their thresholds that affect survival. For this task, the following steps were followed:
+To classify the survival status of patients admitted to the ICU, a decision tree model is applied. Decision trees offer an interpretative way to identify key predictors and their thresholds that affect survival. For this task, the following steps were followed:
 
 1. **Model Fitting**:
    - A decision tree model was fit using the ICU dataset.
@@ -464,7 +464,7 @@ To classify the survival status of patients admitted to the ICU, a decision tree
 
 ### Results:
 
-```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=8, fig.height=6, fig.align='center'}
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=12, fig.align='center'}
 
 library(rpart)
 library(rpart.plot)
@@ -502,23 +502,33 @@ rpart.plot(tm6, main = "Info Gain, cp = 0.001", digits = 3)
 # Reset layout to default
 par(mfrow = c(1, 1))
 ```
+\newpage
+
 ### Interpretation and selection:
 
 **Simplicity and Predictors**
+
 - All trees highlight Consciousness Level as the primary predictor of survival.
+
 - Trees with cp = 0.1 are the simplest, making them easy to interpret, but they do not refine predictions beyond the primary split.
-- Trees with cp = 0.01 add an extra split, offering more detailed classification without ading excessive copmplexity.
+
+- Trees with cp = 0.01 add an extra split, offering more detailed classification without adding excessive complexity.
+
 - Trees with cp = 0.001 are the most complex, with multiple splits that may lead to overfitting.
 
 **Compare splitting Criteria**
+
 - **Gini index** tends to favor splits with balanced distributions of the target classes, which may better handle uncertainty in clinical settings.
-- **Information gain** focuses on maximizing the reduciton in entropy, which could lead to splits that are sightly more biased but more efficient for some datasets.
+
+- **Information gain** focuses on maximizing the reduction in entropy, which could lead to splits that are sightly more biased but more efficient for some datasets.
 
 **Simplicity vs refinement**
-- a tree with cp = 0.01is a good compromise, as it adds refinement without sacrificing interpretability, and without risking overfitting.
-- Among the spliting methods with same cp, the preference depends on the dataset:
 
-  - If the data has imbalanced calsses, gini might be better.
+- a tree with cp = 0.01 is a good compromise, as it adds refinement without sacrificing interpretation, and without risking overfitting.
+
+- Among the splitting methods with same cp, the preference depends on the dataset:
+
+  - If the data has imbalanced classes, gini might be better.
   - If entropy reduction is preferred, Information could perform better.
   
 ### Conclusion:
@@ -526,11 +536,13 @@ par(mfrow = c(1, 1))
 Based on the uploading plots and logic: 
 
 - **Best tree:** Gini, cp=0.01.
-The tree with cp = 0.01 using Gini Index was selected because it offers a good trade-off between interpretability and predictive refinement. Consciousness Level remains the primary driver of survival predictions, while the additional split on Blood Pressure refines subgroups with varying survival probabilities. This tree is simple enough for clinical use while providing actionable insights.
+The tree with cp = 0.01 using Gini Index was selected because it offers a good trade-off between interpretation and predictive refinement. Consciousness Level remains the primary driver of survival predictions, while the additional split on Blood Pressure refines subgroups with varying survival probabilities. This tree is simple enough for clinical use while providing actionable insights.
 
-```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=8, fig.height=6, fig.align='center'}
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=5, fig.height=3, fig.align='center'}
 rpart.plot(tm2, main = "Gini, cp = 0.01", digits = 3)
 ```
+
+\newpage
 
 ## Question 2
 
@@ -569,8 +581,7 @@ auc_comparison <- data.frame(
 )
 
 # Generate a formatted table
-auc_comparison %>%
-  kbl(caption = "Comparison of AUC Values Between Models") %>%
+kable(auc_comparison) %>%
   kable_styling(bootstrap_options = c("striped", "hover", "condensed"), 
                 full_width = FALSE, 
                 position = "center") %>%
@@ -585,10 +596,47 @@ auc_comparison %>%
 ### Interpretation:
 
 1. **Decision Tree vs. Logistic Regression**:
-The decision tree is slightly less accurate but offers interpretability making it a useful option when simplicity is a priority. (For real-time clinical applications)
+The decision tree is slightly less accurate but offers better interpretation making it a useful option when simplicity is a priority. (For real-time clinical applications)
 
-2. **Logistic Regression**:
+2. **Logistic Regression**: 
+Logistic regression achieves higher predictive accuracy, which may be preferable if accuracy outweighs interpretation.
 
-Logistic regression achieves higher predictive accuracy, which may be preferable if accuracy outweighs interpretability.
+In conclusion based on the AUC values, the logistic regression model is the better-performing model for predicting survival. However, the decision tree remains as a valuable option for its interpretation and simplicity, especially in clinical settings where understanding the decision-making process is crucial.
 
-In conclusion based on the AUC values, the logistic regression model is the better-performing model for predicting survival. However, the decision tree remains as a valuable option for its interpretability and simplicity, especially in clinical settings where understanding the decision-making process is crucial.
+## Question 3
+
+Calculate a LOOCV-corrected AUC for the decision tree model and comment on the result.
+
+### Approach:
+
+- **LOOCV for Decision Tree**:
+
+  Perform Leave One Out Cross Validation (LOOCV) for the decision tree model to calculate the LOOCV-adjusted AUC.
+- We have chosen the above mentioned best decision tree model with Gini Index and cp = 0.01 for this analysis.
+
+### Results:
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# Create a vector for the predicted values
+predprob_tm_LOOCV <- numeric(nrow(data_ca4)) 
+
+for (i in 1:nrow(data_ca4)) {
+  # Create training and validation sets
+  data_training_tree <- data_ca4[-i,]
+  data_validation_tree <- data_ca4[i, ,drop=FALSE]
+  # Fit the model on the training data
+  tm_loocv <- rpart(Survival ~.,method = "class", data=data_training_tree, parms = list(split = "gini"), cp = 0.01)
+  # Predict the value for the held-out observation
+  predprob_tm_LOOCV[i] <- predict(tm_loocv, newdata = data_validation_tree, type = "prob")[,2]
+}
+
+roc(data_ca4$Survival, predprob_tm_LOOCV)
+```
+
+
+### Interpretation:
+
+- The LOOCV-adjusted AUC is 0.6284 which is a significant decrease from the original AUC of 0.8115. This indicates that the decision tree model may be overfitting the data, leading to a lower predictive performance on unseen data. 
+- Hence, when comparing the LOOCV-adjusted AUCs of the decision tree model and the logistic regression model, the logistic regression model remains the better-performing model and more reliable for predicting survival probabilities on unseen data.
+- The decision tree model may benefit from additional tuning or simplification to enhance its predictive performance and avoid overfitting.
+- This could be due to the presence of the parameters BloodPressure and Patient ID in the model, which may not be significant predictors of survival and could be contributing to overfitting.
