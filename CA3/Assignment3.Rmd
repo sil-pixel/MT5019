@@ -85,6 +85,15 @@ extract_model_info <- function(model, description) {
       AIC = '.'
     ))
   }
+  if(description == "XYZV") {
+    return(data.frame(
+      Model = description,
+      Deviance = 0,
+      df = 0,
+      `p-value` = 1,
+      AIC = AIC(model)
+    ))
+  }
   data.frame(
     Model = description,
     Deviance = model$deviance,
@@ -165,10 +174,10 @@ kable(model_results, caption = "Model Comparison Results", align = c("l", "c", "
 
 **2. Impact of Higher-Order Interactions:**
 
-  - Models including higher-order interactions (e.g., XYZV) exhibit extremely low p-values, suggesting overfitting and unnecessary complexity. The saturated model achieves perfect fit but at the cost of increased complexity, as reflected in its AIC.
+  - Models including single or lower-order interactions (e.g., X,Y,Z,V) exhibit low p-values compared to the higher-order interactions (e.g., XYZ,XYV,YZV). 
+  - The saturated model achieves perfect fit but at the cost of increased complexity, as reflected in its AIC.
   - Models with XYV, XZV as interactions have the highest p-values, indicating that removing some of the three-way interactions does not significantly reduce the model fit. These models are candidates for simpler yet statistically robust options.
-  - The differences in the degrees of freedom in the same order interactions is caused due to the repeated use of one variable in the interaction terms and in turn, causing the missing effect of one or more variables in the model.
-  - The deviance of the models has an increasing trend as the number of interactions decreased, indicating that the model fit is getting worse as the interactions are removed.
+  - The deviance and df of the models has an increasing trend as the number of interactions decreased.
   
 
 ### Interpretation:
