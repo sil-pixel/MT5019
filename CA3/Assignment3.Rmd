@@ -211,9 +211,9 @@ Therefore our focus will be on comparing models based on AIC, p-values, and good
 
 We have chosen the Likelihood Ratio Test due to the nested nature of all models, where each model is a subset of the next model.
 
-The Null Hypothesis of a LR test ($H_0$) : the reduced model fits the data better than the saturated model.
+The Null Hypothesis of a LR test ($H_0$) : the simpler model is sufficient to explain the data.
 
-Alternative Hypothesis ($H_A$) : the saturated model provides a better fit. 
+Alternative Hypothesis ($H_A$) : the simpler model is not sufficient to explain the data. 
 
 The p-value from the LR test will help us determine if the reduced model is significantly different from the saturated model where we reject the null hypothesis if the p-value is less than the significance level (0.05).
 
@@ -488,7 +488,7 @@ comparison_results <- data.frame(
 )
 
 # Print the comparison results in a table
-kable(comparison_results, caption = "Comparison of Estimates and Standard Errors between Log-Linear and Logistic Regression Models")
+kable(comparison_results, caption = "Comparison of Estimates and Standard Errors between Log-Linear and Logistic Regression Models", row.names = FALSE)
 ```
 
 ### Interpretation:
