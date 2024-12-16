@@ -9,6 +9,7 @@ output: pdf_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(dplyr)
+library(knitr)
 ```
 
 ---
@@ -224,7 +225,7 @@ The Hosmer-Lemeshow test indicates that the model fits the data well. The observ
 
 ## Question 3
 
-Create a confusion matrix for the chosen model. Calculate the accuracy, sensitivity, specificity, and positive and negative predictive values. Interpret the results.
+Create a confusion matrix for the chosen model. Calculate the accuracy, sensitivity, specificity, and positive and negative predictive values for three values of threshold. Describe and explain the result.
 
 ### Approach:
 
@@ -236,9 +237,9 @@ Create a confusion matrix for the chosen model. Calculate the accuracy, sensitiv
   
 - Implementation:
 
-  - Threshold of 0.5 is used to classify the predicted probabilities into binary outcomes since it is the default threshold for logistic regression.
+  - Threshold of 0.3, 0.5 and 0.7 are used to classify the predicted probabilities into binary outcomes to view the variation in the range of sensitivity and specificity.
   
-  - Calculate the accuracy, sensitivity, specificity, and positive and negative predictive values from the confusion matrix.
+  - Calculate the accuracy, sensitivity, specificity, and positive and negative predictive values from the confusion matrix for each threshold.
   
   - Here, the positive of the model is "Not Survived" and the negative is "Survived".
 
@@ -246,45 +247,91 @@ Create a confusion matrix for the chosen model. Calculate the accuracy, sensitiv
 
 **Specificity: ** Specificity (True Negative Rate) measures the proportion of actual negative cases that are correctly identified by the model.
 
+**Threshold = 0.5:** The model classifies predictions with probabilities greater than or equal to 0.5 as positive (predicts “not survive”) and those below 0.5 as negative (predicts “survive”).
+
   
 ### Results:
 
-```{r echo=FALSE, message=FALSE}
-# Predicted probabilities
-predicted_classes <- ifelse(predicted_probs > 0.5, 1, 0)
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.align='left'}
+create_conf_matrix <- function(threshold) {
+  # Predicted probabilities
+  predicted_classes <- ifelse(predicted_probs > threshold, 1, 0)
+  
+  # Confusion Matrix
+  conf_matrix <- table(1-data_ca4$Survival, 1-predicted_classes)
 
-# Confusion Matrix
-conf_matrix <- table(data_ca4$Survival, predicted_classes)
+  # Print the confusion matrix
+  rownames(conf_matrix) <- c("Actual Not Survived", "Actual Survived")
+  return (conf_matrix)
+}
+conf_matrix_0.3 <- create_conf_matrix(0.3)
+kable(conf_matrix_0.3, caption = paste("Confusion Matrix at threshold=", 0.3), col.names = c("Predicted Not Survived", "Predicted Survived"), row.names = TRUE)
+conf_matrix_0.5 <- create_conf_matrix(0.5)
+kable(conf_matrix_0.5, caption = paste("Confusion Matrix at threshold=", 0.5), col.names = c("Predicted Not Survived", "Predicted Survived"), row.names = TRUE)
+conf_matrix_0.7 <- create_conf_matrix(0.7)
+kable(conf_matrix_0.7, caption = paste("Confusion Matrix at threshold=", 0.7), col.names = c("Predicted Not Survived", "Predicted Survived"), row.names = TRUE)
+```
 
-# Calculate performance metrics
-accuracy <- sum(diag(conf_matrix)) / sum(conf_matrix)
-sensitivity <- conf_matrix[1, 1] / sum(conf_matrix[1, ])
-specificity <- conf_matrix[2, 2] / sum(conf_matrix[2, ])
 
-# Print the confusion matrix
-rownames(conf_matrix) <- c("Actual Not Survived", "Actual Survived")
-knitr::kable(conf_matrix, caption = "Confusion Matrix", col.names = c("Predicted Not Survived", "Predicted Survived"), row.names = TRUE)
 
-# Display performance metrics
-knitr::kable(data.frame(
-  Metric = c("Accuracy", "Sensitivity", "Specificity"),
-  Value = c(accuracy, sensitivity, specificity)
-), caption = "Performance Metrics", col.names = c("Metric", "Value"))
+```{r echo=FALSE, message=FALSE, fig.align='right'}
+create_perf_metrics <- function(threshold, conf_matrix) {
+    # Calculate performance metrics
+  accuracy <- sum(diag(conf_matrix)) / sum(conf_matrix)
+  sensitivity <- conf_matrix[1, 1] / sum(conf_matrix[1, ])
+  specificity <- conf_matrix[2, 2] / sum(conf_matrix[2, ])
 
+  # Display performance metrics
+  kable(data.frame(
+    Metric = c("Accuracy", "Sensitivity", "Specificity"),
+    Value = c(accuracy, sensitivity, specificity)
+  ), caption = paste("Performance Metrics at threshold=", threshold), col.names = c("Metric", "Value"))
+}
+# call at threshold 0.3
+create_perf_metrics(0.3, conf_matrix_0.3)
+# call at threshold 0.5
+create_perf_metrics(0.5, conf_matrix_0.5)
+# call at threshold 0.7
+create_perf_metrics(0.7, conf_matrix_0.7)
 ```
 
 
 ### Interpretation:
 
+**Threshold = 0.3:**
+
+**Accuracy:** The model has an accuracy of 0.835, meaning that it correctly predicted 83.5% of the cases.
+
+**Sensitivity:** The sensitivity of 0.625 indicates that the model correctly identified 62.5% of the actual non-survivors.
+
+**Specificity:** The specificity of 0.8875 suggests that the model correctly identified 88.75% of the actual survivors.
+
+**Threshold = 0.5:**
+
 **Accuracy:** The model has an accuracy of 0.865, meaning that it correctly predicted 86.5% of the cases.
 
-**Sensitivity:** The sensitivity of 0.96875 indicates that the model correctly identified 96.9% of the actual non-survivors.
+**Sensitivity:** The sensitivity of 0.45 indicates that the model correctly identified 45% of the actual non-survivors.
 
-**Specificity:** The specificity of 0.45 suggests that the model correctly identified 45% of the actual survivors.
+**Specificity:** The specificity of 0.96875 suggests that the model correctly identified 96.9% of the actual survivors.
+
+**Threshold = 0.7:**
+
+**Accuracy:** The model has an accuracy of 0.84, meaning that it correctly predicted 84% of the cases.
+
+**Sensitivity:** The sensitivity of 0.25 indicates that the model correctly identified 25% of the actual non-survivors.
+
+**Specificity:** The specificity of 0.9875 suggests that the model correctly identified 98.75% of the actual survivors.
+
+**Impact of Threshold:**
+
+- Thresholds control the trade-off between sensitivity and specificity:
+	- A lower threshold (e.g., 0.3) typically increases sensitivity because more cases are classified as “not survive,” but it may decrease specificity.
+	- A higher threshold (e.g., 0.7) typically increases specificity because fewer cases are classified as “not survive,” but sensitivity may decrease.
+	- Compared to 0.3 and 0.7 thresholds, the accuracy is highest at the threshold of 0.5, which is the default threshold for binary classification.
 
 ### Conclusion:
 
-The confusion matrix and performance metrics provide insights into the model's predictive accuracy. The model has a high sensitivity, indicating that it is highly effective at identifying non-survivors. However, the specificity is relatively low, suggesting that the model has difficulty identifying actual survivors. The results tell us that the model can be used for rule-out purposes of non-survivors. Further optimization may be needed to improve the model's sensitivity for predicting survivors.
+The confusion matrix and performance metrics provide insights into the model's predictive accuracy. In general over the three thresholds, the model has a high specificity, indicating that it is highly effective at identifying survivors. However, the sensitivity is relatively low, suggesting that the model has difficulty identifying actual non-survivors. 
 
 
 ## Question 4
@@ -321,7 +368,7 @@ Create plots of ROC curves for the chosen model. Calculate the AUC for the full 
   
 ### Results:
 
-```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=6, fig.height=4, fig.align='center'}
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=8, fig.height=6, fig.align='center'}
 # Load the pROC package
 library(pROC)
 full_model_roc <- roc(data_ca4$Survival, predicted_probs)
