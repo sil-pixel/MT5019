@@ -237,15 +237,24 @@ Create a confusion matrix for the chosen model. Calculate the accuracy, sensitiv
   
 - Implementation:
 
-  - Threshold of 0.3, 0.5 and 0.7 are used to classify the predicted probabilities into binary outcomes to view the variation in the range of sensitivity and specificity.
+  - Threshold of 0.3, 0.5 and 0.7 are used to classify the predicted probabilities into binary outcomes to view the range of sensitivity and specificity.
   
   - Calculate the accuracy, sensitivity, specificity, and positive and negative predictive values from the confusion matrix for each threshold.
   
   - Here, the positive of the model is "Not Survived" and the negative is "Survived".
 
+**Accuracy:** Accuracy measures the proportion of correct predictions made by the model.
+
+$\text{Accuracy} = \frac{\text{True Positives (TP)} + \text{True Negatives (TN)}}{\text{Total Predictions (TP + TN + FP + FN)}}$
+
 **Sensitivity: ** Sensitivity (True Positive Rate) measures the proportion of actual positive cases that are correctly identified by the model. 
 
+$\text{Sensitivity (True Positive Rate)} = \frac{\text{True Positives (TP)}}{\text{True Positives (TP)} + \text{False Negatives (FN)}}$
+
 **Specificity: ** Specificity (True Negative Rate) measures the proportion of actual negative cases that are correctly identified by the model.
+
+$\text{Specificity (True Negative Rate)} = \frac{\text{True Negatives (TN)}}{\text{True Negatives (TN)} + \text{False Positives (FP)}}$
+
 
 **Threshold = 0.5:** The model classifies predictions with probabilities greater than or equal to 0.5 as positive (predicts “not survive”) and those below 0.5 as negative (predicts “survive”).
 
@@ -336,7 +345,7 @@ The confusion matrix and performance metrics provide insights into the model's p
 
 ## Question 4
 
-Create plots of ROC curves for the chosen model. Calculate the AUC for the full model and two more models. Choose the best model based on the AUC. Interpret the results.
+Create plots of ROC curves for the chosen model. Calculate the AUC for the full model and two more models. Choose the best model based on the AUC. 
 
 ### Approach:
 
@@ -402,7 +411,7 @@ knitr::kable(data.frame(
 ), caption = "AUC Values", col.names = c("Model", "AUC"))
 ```
 
-### Interpretation:
+### Model Selection:
 
 - The full model has the highest AUC of 0.873, indicating that it has a better predictive performance for survival probabilities compared to the other models.
 - Model A, which excludes Blood Pressure, has an AUC of 0.871 is quite close to the full model, whereas Model B, which excludes ConsciousnessLevel, has an AUC of 0.804, which has a bigger difference with full model compared to the Model B.
@@ -470,13 +479,16 @@ knitr::kable(data.frame(
 
 - Model A having a higher AUC than full model indicates that the full model was overfitted in the previous analysis, and Model A is the best model for predicting survival probabilities.
 
-- This means that Blood Pressure is not required to be added as a explanatory variable while predicting the survival probabilities of the patients.
+- This means that Blood Pressure is not required to be added as a explanatory variable while predicting the survival probabilities of the patients and removing it from the model improves the predictive performance.
 
 - The AUC of Model B has further decreased compared to the previous analysis, suggesting that the previous Model B was also overfitted and that there is a bigger impact of the ConsciousnessLevel of the patient in predicting their survival than previously thought.
 
 - This signifies that ConsciousnessLevel of the patient is very essential to predict the survival probability.
 
+---
 
+
+\newpage 
 
 # Exercise 4:2 (Decision Tree)
 
@@ -686,7 +698,6 @@ roc(data_ca4$Survival, predprob_tm_LOOCV)
 
 ### Interpretation:
 
-- The LOOCV-adjusted AUC is 0.6284 which is a significant decrease from the original AUC of 0.8115. This indicates that the decision tree model may be overfitting the data, leading to a lower predictive performance on unseen data. 
-- Hence, when comparing the LOOCV-adjusted AUCs of the decision tree model and the logistic regression model, the logistic regression model remains the better-performing model and more reliable for predicting survival probabilities on unseen data.
+- The LOOCV-adjusted AUC is 0.6284 which is a significant decrease from the unadjusted AUC of 0.8115. This indicates that the decision tree model may be overfitting the data, leading to a lower predictive performance on unseen data. 
 - The decision tree model may benefit from additional tuning or simplification to enhance its predictive performance and avoid overfitting.
 - This could be due to the presence of the parameters BloodPressure and Patient ID in the model, which may not be significant predictors of survival and could be contributing to overfitting.
