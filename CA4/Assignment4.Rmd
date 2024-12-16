@@ -215,7 +215,7 @@ hoslem_test
 
 **Interpretation:**
 
-  1. The p-value of 0.9145 tells us not reject the null hypothesis that the model fits the data well. 
+  1. The p-value of 0.8998 tells us not reject the null hypothesis that the model fits the data well. 
   
 ### Conclusion:
 
@@ -239,10 +239,13 @@ Create a confusion matrix for the chosen model. Calculate the accuracy, sensitiv
   - Threshold of 0.5 is used to classify the predicted probabilities into binary outcomes since it is the default threshold for logistic regression.
   
   - Calculate the accuracy, sensitivity, specificity, and positive and negative predictive values from the confusion matrix.
+  
+  - Here, the positive of the model is "Not Survived" and the negative is "Survived".
 
-**Sensitivity: ** Sensitivity (True Positive Rate) measures the proportion of actual positive cases that are correctly identified by the model.
+**Sensitivity: ** Sensitivity (True Positive Rate) measures the proportion of actual positive cases that are correctly identified by the model. 
 
 **Specificity: ** Specificity (True Negative Rate) measures the proportion of actual negative cases that are correctly identified by the model.
+
   
 ### Results:
 
@@ -255,8 +258,8 @@ conf_matrix <- table(data_ca4$Survival, predicted_classes)
 
 # Calculate performance metrics
 accuracy <- sum(diag(conf_matrix)) / sum(conf_matrix)
-specificity <- conf_matrix[1, 1] / sum(conf_matrix[1, ])
-sensitivity <- conf_matrix[2, 2] / sum(conf_matrix[2, ])
+sensitivity <- conf_matrix[1, 1] / sum(conf_matrix[1, ])
+specificity <- conf_matrix[2, 2] / sum(conf_matrix[2, ])
 
 # Print the confusion matrix
 rownames(conf_matrix) <- c("Actual Not Survived", "Actual Survived")
@@ -275,13 +278,13 @@ knitr::kable(data.frame(
 
 **Accuracy:** The model has an accuracy of 0.865, meaning that it correctly predicted 86.5% of the cases.
 
-**Sensitivity:** The sensitivity of 0.45 indicates that the model correctly identified 45% of the actual survivors.
+**Sensitivity:** The sensitivity of 0.96875 indicates that the model correctly identified 96.9% of the actual non-survivors.
 
-**Specificity:** The specificity of 0.96875 suggests that the model correctly identified 96.9% of the actual non-survivors.
+**Specificity:** The specificity of 0.45 suggests that the model correctly identified 45% of the actual survivors.
 
 ### Conclusion:
 
-The confusion matrix and performance metrics provide insights into the model's predictive accuracy. The model has a specificity, indicating that it is highly effective at identifying non-survivors. However, the sensitivity is relatively low, suggesting that the model has difficulty identifying actual survivors. The results tell us that the model can be used for rule-out purposes, but it may not be as effective for rule-in purposes. Further optimization may be needed to improve the model's sensitivity for predicting survivors.
+The confusion matrix and performance metrics provide insights into the model's predictive accuracy. The model has a high sensitivity, indicating that it is highly effective at identifying non-survivors. However, the specificity is relatively low, suggesting that the model has difficulty identifying actual survivors. The results tell us that the model can be used for rule-out purposes of non-survivors. Further optimization may be needed to improve the model's sensitivity for predicting survivors.
 
 
 ## Question 4
