@@ -190,7 +190,6 @@ kable(model_results, caption = "Model Comparison Results", align = c("l", "c", "
 
 Choose from your table a model with few parameters and a good fit. Describe the procedure to compare different models.
 
-
 ### Approach: 
 
 To answer question 2, we aim to identify a good model that balances simplicity and fit. 
@@ -205,19 +204,11 @@ A good model should:
 
 We can infer from the model comparison results that higher-order interactions (e.g., 3-way and 4-way) don't significantly contribute to explaining the relationships, as they may be too complex and difficult to interpret, as well as prone to overfitting. 
 
-Therefore our focus will be on comparing models based on AIC, p-values, and goodness-of-fit, and p-values from Likelihood Ratio Test and identifying the model with the lowest AIC that balances fit and complexity.
+Therefore our focus will be on comparing models based on AIC, p-values, and goodness-of-fit, and identifying the model with the lowest AIC that balances fit and complexity.
 
-### LRT Output:
+We reject the null hypothesis if the p-value is less than the significance level (0.05), indicating that the reduced model is not sufficient to explain the data.
 
-We have chosen the Likelihood Ratio Test due to the nested nature of all models, where each model is a subset of the next model.
-
-The Null Hypothesis of a LR test ($H_0$) : the simpler model is sufficient to explain the data.
-
-Alternative Hypothesis ($H_A$) : the simpler model is not sufficient to explain the data. 
-
-The p-value from the LR test will help us determine if the reduced model is significantly different from the saturated model where we reject the null hypothesis if the p-value is less than the significance level (0.05).
-
-To compare with the saturated model, we have chosen the model with the least AIC from the model comparison results with a p-value of 0.9353 and 6 degrees of freedom. We will compare the saturated model with the chosen model using the Likelihood Ratio Test.
+To compare with the saturated model, we have chosen the model with the least AIC from the model comparison results with a p-value of 0.9353 and 6 degrees of freedom. We will compare the saturated model with the chosen model by their AIC values.
   
 ```{r echo=FALSE, message=FALSE}
 # Load the data
@@ -231,13 +222,9 @@ m1 <- glm(n ~ x * y + x * z + x * v + y * v + z * v, family = poisson(link = "lo
 
 # Compare models using AIC and LRT
 aic_results <- AIC(msat, m1)
-lrt_results <- anova(msat, m1, test = "LRT")
 
 # Output AIC results
 kable(aic_results[2], caption = "AIC Comparison Results", col.names = c("AIC"))
-
-print("Likelihood Ratio Test Results:")
-print(lrt_results)
 ```
 
 ### Conclusion:
@@ -250,19 +237,11 @@ Reduced model (m1): AIC =  113.7953
 
 The reduced model (m1) has a lower AIC value compared to the saturated model, indicating a better balance between goodness-of-fit with fewer parameters.
 
-**Residual Deviance:**
-
-Saturation model (msat): 0.0000 (perfect fit)
-
-Reduced model (m1): 1.8221
-
-The residual deviance of the reduced model (m1) is slightly higher than the saturated model, which is expected as the reduced model has fewer parameters.
-
 **P-value:**
 
 p-value = 0.9353
 
-The p-value from the Likelihood Ratio Test is 0.9353, which is greater than the statistical significant level 0.05. This indicates that the reduced model (m1) is a better fit compared to the saturated model (msat). The reduced model captures the essential relationships between variables while maintaining simplicity and interpretability.
+The p-value of the reduced model is 0.9353. This indicates that the reduced model (m1) is a a very good fit. The reduced model captures the essential relationships between variables while maintaining simplicity and interpretability.
 
 ## Question3:
 
@@ -310,19 +289,20 @@ Compute Odds Ratios from Coefficients:
 
 ```{r echo=FALSE, message=FALSE}
 # Calculate odds ratios and confidence intervals
-odds_ratios <- exp(coef(m1))
-conf_intervals <- exp(confint(m1))
+odds_ratios <- exp(coef(m1)[6:10])
+conf_intervals_lower <- exp(confint(m1)[6:10, 1])
+conf_intervals_upper <- exp(confint(m1)[6:10, 2])
 #print the odds ratios and confidence intervals
-kable(cbind(odds_ratios, conf_intervals), caption = "Odds Ratios and 95% Confidence Intervals", col.names = c("Odds Ratio", "Lower CI", "Upper CI"))
+kable(cbind(odds_ratios, conf_intervals_lower, conf_intervals_upper), caption = "Odds Ratios and 95% Confidence Intervals", col.names = c("Odds Ratio", "Lower CI", "Upper CI"))
 ```
 
 ### Interpretation of Associations:
 
-The odds of child survival based on the odds ratios and confidence intervals for each significant interaction term are as follows:
+The odds ratios and confidence intervals for each significant interaction term are as follows:
 
-  - Mother's age and smoking habits (XY): The odds of survival decrease by 33.7% for a certain smoking habit when maternal age increases.
+  - Mother's age and smoking habits (XY): Older maternal age reduces the odds of smoking habits by 33.7%.
   
-  - Mother's age and gestational age (XZ): A 15.3% decrease in odds of survival is observed with longer gestational age for older mothers.
+  - Mother's age and gestational age (XZ): Older maternal age reduces the odds of a longer gestational age by 15.3%.
   
   - Mother's age and child survival (XV): Older maternal age reduces the odds of survival by 37.2%.
   
@@ -337,7 +317,7 @@ The odds of child survival based on the odds ratios and confidence intervals for
 - Significant Predictors: 
   Variables with confidence intervals that exclude 1 (x:y, x:v, z:v) are statistically significant predictors.
 - Practical Implications: 
-  Smoking habits and gestational age have the strongest influence on child survival, as shown by their odds ratios.
+  Mother's age and gestational age have the strongest influence on child survival, as shown by their odds ratios.
   
   
 ## Question 4:
@@ -450,7 +430,9 @@ Illustrate the relationship between the logistic regression model from question 
 
   - Fit a log-linear model to analyze the relationship between the categorical variables Mother's age, Smoking habits, Gestational age, and Child survival to capture the relationships corresponding to the logistic regression model where Child survival is the response variable.
   
-  - Use the glm() function with the family argument set to poisson(link = "log") to fit the log-linear model with interaction variables as $x * y * v, x * z * v, y * z * v$.
+  - Use the glm() function with the family argument set to poisson(link = "log") to fit the log-linear model with interaction variables as $x * y * v, x * z * v, y * z * v, x * y * z$.
+  
+# reduce the logistic one to remove interactions
   
 - **Relationship between Log-Linear and Logistic Regression Models:**
 
@@ -468,27 +450,37 @@ Illustrate the relationship between the logistic regression model from question 
 
 ```{r echo=FALSE, message=FALSE}
 # Extract coefficients and standard errors from the log-linear model
-m_new <- glm(n ~ x * y * v + x * z * v + y * z * v, family = poisson(link = "log"), data = data3)
-log_linear_coefs <- coef(m_new)[c("x:v", "y:v", "v:z", "x:y:v", "x:v:z", "y:v:z")]
-log_linear_se <- summary(m_new)$coefficients[, 2][c("x:v", "y:v", "v:z", "x:y:v", 
-                                                 "x:v:z", "y:v:z")]
+m_new <- glm(n ~ x * y * v + x * z * v + y * z * v + x * y * z, family = poisson(link = "log"), data = data3)
+log_linear_coefs <- coef(m_new)[c("x:v", "y:v", "v:z")]
+log_linear_se <- summary(m_new)$coefficients[, 2][c("x:v", "y:v", "v:z")]
 
 # Extract coefficients and standard errors from the logistic regression model
-logit_coefs <- coef(logit_model)[c("x", "y", "z", "x:y", "x:z", "y:z")]
-logit_se <- summary(logit_model)$coefficients[, 2][c("x", "y", "z", "x:y", "x:z"
-                                                     , "y:z")]
+# Fit a reduced logistic regression model
+reduced_logit_model <- glm(v ~ x + y + z, family = binomial(link = "logit"), data = binary_data)
+logit_coefs <- coef(logit_model)[c("x", "y", "z")]
+logit_se <- summary(logit_model)$coefficients[, 2][c("x", "y", "z")]
 
 # Create a data frame to compare the estimates and standard errors
 comparison_results <- data.frame(
-  Variable = c("Mother's age", "Smoking habits", "Gestational age", "Mother's age:Smoking habits", "Mother's age:Gestational age", "Smoking habits:Gestational age"),
+  Variable = c("Mother's age", "Smoking habits", "Gestational age"),
   Log_Linear_Est = log_linear_coefs,
   Logistic_Est = logit_coefs,
   Log_Linear_SE = log_linear_se,
   Logistic_SE = logit_se
 )
 
+# create a data frame for differences
+difference_results <- data.frame(
+  Variable = c("Mother's age", "Smoking habits", "Gestational age"),
+  Est_Difference = log_linear_coefs - logit_coefs,
+  SE_Difference = log_linear_se - logit_se
+)
+
 # Print the comparison results in a table
 kable(comparison_results, caption = "Comparison of Estimates and Standard Errors between Log-Linear and Logistic Regression Models", row.names = FALSE)
+
+# print differences in estimates and standard errors
+kable(difference_results, caption = "Differences in Estimates and Standard Errors between Log-Linear and Logistic Regression Models", row.names = FALSE)
 ```
 
 ### Interpretation:
