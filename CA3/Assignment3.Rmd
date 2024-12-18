@@ -349,19 +349,22 @@ Fit a logistic regression model for the probability of child survival as a funct
 binary_data <- data3[rep(1:nrow(data3), data3$n), ]  # Expand rows by frequency `n`
 binary_data$n <- NULL  # Drop the frequency column, as it's no longer needed
 
-# Fit the logistic regression model
-logit_model <- glm(v ~ x + y + z + x:y + x:z + y:z, 
-                   family = binomial(link = "logit"), 
-                   data = binary_data)
+# Full logistic regression model
+logit_full <- glm(v ~ x + y + z + x:y + x:z + y:z, family = binomial(link = "logit"), data = binary_data)
 
-# Display the summary of the logistic regression model
+# Remove insignificant interactions one by one
+logit_step1 <- update(logit_full, . ~ . - x:y)
+logit_step2 <- update(logit_step1, . ~ . - x:z)
+logit_model <- update(logit_step2, . ~ . - y:z)
+
+# Final reduced model
 summary(logit_model)
 
-# Calculate odds ratios and confidence intervals
+# Calculate odds ratios and confidence intervals for final model
 odds_ratios <- exp(coef(logit_model))
 conf_intervals <- exp(confint(logit_model))
 
-# Combine results into a data frame for interpretation
+# Combine results into a table
 logit_results <- data.frame(
   Variable = names(odds_ratios),
   Odds_Ratio = odds_ratios,
@@ -370,8 +373,9 @@ logit_results <- data.frame(
   P_Value = summary(logit_model)$coefficients[, 4]
 )
 
-# Print the logistic regression results in a table
+# Print results
 kable(logit_results, caption = "Logistic Regression Results: Odds Ratios, Confidence Intervals, and P-Values")
+
 ```
 
 -**Model Summary:**
@@ -384,28 +388,22 @@ kable(logit_results, caption = "Logistic Regression Results: Odds Ratios, Confid
     
   
 -**Significant Predictors:**
-
- - Intercept:
- 
-    - Odds ratio = 6.37: The baseline of child survival when all predictors are zero.
-    
-    - Highly significant (p < 0.05).
     
   - Mother's age (X):
   
-    - Estimate = -0.5893: Older mothers have decreased odds of their child survival.
+    - Odds ratio: 0.63
     
-    - Odds Ratio = 0.55: The odds of child survival decrease by 45% (for each year increase in maternal age(=1-0.55) for older mothers.
+    - For each unit increase in maternal age, the odds of child survival decrease by 37%. (1-0.63).
     
-    - Significant (p = 0.01 < 0.05).
-    
+    - P-value: 0.009, indicating a statistically significant effect.
+  
   - Gestational age (Z):
   
-    - Estimate = 3.2479: Higher gestational age strongly increases the odds of child survival.
+    - Odds ratio: 27.38
     
-    - Odds Ratio = 25.74: For a longer gestational age, the odds of child survival are 25.74 higher for a one-unit increase in gestational age.
+    - Higher gestational age increases the odds of child survival by 27 times.
     
-    - Highly significant (p < 0.05).
+    - P-value: < 0.00o1, indicating a highly significant effect.
     
 ### Conclusion:
 
