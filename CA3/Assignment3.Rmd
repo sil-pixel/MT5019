@@ -205,8 +205,6 @@ We can infer from the model comparison results that higher-order interactions (e
 
 Therefore our focus will be on comparing models based on AIC, p-values, and goodness-of-fit, and identifying the model with the lowest AIC that balances fit and complexity.
 
-We reject the null hypothesis if the p-value is less than the significance level (0.05), indicating that the reduced model is not sufficient to explain the data.
-
 To compare with the saturated model, we have chosen the model with the least AIC from the model comparison results of ordered AIC with a p-value of 0.9353 and 6 degrees of freedom. We will compare the saturated model with the chosen model by their AIC values.
   
 ```{r echo=FALSE, message=FALSE}
@@ -237,6 +235,8 @@ Reduced model (m1): AIC =  113.7953
 The reduced model (m1) has a lower AIC value compared to the saturated model, indicating a better balance between goodness-of-fit with fewer parameters.
 
 **P-value:**
+
+We reject the null hypothesis if the p-value is less than the significance level (0.05), indicating that the reduced model is not sufficient to explain the data.
 
 p-value = 0.9353
 
@@ -550,3 +550,6 @@ While the estimation process is similar, the interpretation of parameters differ
 
   - Better suited for predicting probabilities or understanding direct effects on a binary outcome.
   - More interpretable when the focus is on one specific outcome (e.g., child survival).
+  
+---  
+  
