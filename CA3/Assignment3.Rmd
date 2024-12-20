@@ -168,8 +168,8 @@ kable(model_results, caption = "Model Comparison Results", align = c("l", "c", "
 
 **1. Trends in AIC Across Models:**
 
-  - Models with only main effects or single two-way interactions have high AICs, indicating poor fit.
-  - Removing specific two-way and three-way interactions, such as ZV or XZV, significantly increases the AIC, highlighting the importance of these interaction terms for explaining the data.
+  - Models with only main effects or single two-way interactions have high AICs, indicating poor fit, indicating that the main effects or single interactions alone are insufficient to explain the data.
+  - Removing specific two-way and three-way interactions, such as ZV or XZV, significantly increases the AIC, highlighting the importance of these interaction terms of gestational age, mother's age and child survival for explaining the data.
   - The model with the lowest AIC is the one with interactions XY, XZ, XV, YV, ZV, suggesting it balances goodness-of-fit and model complexity most effectively. This model includes all two-way interactions except YZ, capturing significant dependencies among variables while avoiding overfitting. 
 
 **2. Impact of Higher-Order Interactions:**
@@ -177,12 +177,11 @@ kable(model_results, caption = "Model Comparison Results", align = c("l", "c", "
   - Models including single or lower-order interactions (e.g., X,Y,Z,V) exhibit low p-values compared to the higher-order interactions (e.g., XYZ,XYV,YZV). 
   - The saturated model achieves perfect fit but at the cost of increased complexity, as reflected in its AIC.
   - Models with XYV, XZV as interactions have the highest p-values, indicating that removing some of the three-way interactions does not significantly reduce the model fit. These models are candidates for simpler yet statistically robust options.
-  - The deviance and df of the models has an increasing trend as the number of interactions decreased.
+  - The increasing trend of deviance and degrees of freedom (df) as the number of interactions decreases reflects the trade-off between model complexity and goodness-of-fit: simpler models fit the data less well but have more residual degrees of freedom.
   
 
 ### Interpretation:
 
-  - Adding three-way interactions increases the number of parameters dramatically. 
   - For categorical variables like Mother’s Age, Smoking Habits, and Gestational Age, a two-way interaction like Smoking Habits $\times$ Gestational Age may explain most of the variation in child survival, while the three-way interaction Mother’s Age $\times$ Smoking Habits $\times$ Gestational Age contributes very little.
   - In practice, three-way interactions between variables like Mother’s Age, Smoking Habits, and Gestational Age often have small or negligible effects compared to the main effects and two-way interactions.
   
@@ -208,7 +207,7 @@ Therefore our focus will be on comparing models based on AIC, p-values, and good
 
 We reject the null hypothesis if the p-value is less than the significance level (0.05), indicating that the reduced model is not sufficient to explain the data.
 
-To compare with the saturated model, we have chosen the model with the least AIC from the model comparison results with a p-value of 0.9353 and 6 degrees of freedom. We will compare the saturated model with the chosen model by their AIC values.
+To compare with the saturated model, we have chosen the model with the least AIC from the model comparison results of ordered AIC with a p-value of 0.9353 and 6 degrees of freedom. We will compare the saturated model with the chosen model by their AIC values.
   
 ```{r echo=FALSE, message=FALSE}
 # Load the data
@@ -262,17 +261,34 @@ The reduced model (m1) with interactions XY, XZ, XV, YV, ZV was selected as the 
 
 ### Model coefficients:
 
-The chosen model(m1) includes significant two-way interactions XY, XZ, XV, YV, ZV. This interactions highlight the relationships between:
+The chosen model(m1) includes two-way interactions XY, XZ, XV, YV, ZV. This interactions highlight the relationships between:
 
-  - Mother's age and smoking habits (XY): Indicates that smoking habits vary significantly across maternal age groups.
+  - Mother's age and smoking habits (XY): Suggests that smoking habits may vary across the age of mothers below and above 30 years.
   
   - Mother's age and gestational age (XZ): Suggests that gestational age may be influenced by maternal age.
   
-  - Mother's age and child survival (XV): Indicates that child survival is critically dependent on maternal age.
+  - Mother's age and child survival (XV): Suggests that child survival may depend if the maternal age is below or above 30 years.
   
-  - Smoking habits and child survival (YV): Shows the direct impact of smoking habits on child survival rates.
+  - Smoking habits and child survival (YV): Suggests there could be a direct impact of smoking habits on child survival rates.
   
-  - Gestational age and child survival (ZV): Reinforces that gestational age is a key factor in determining child survival rates.
+  - Gestational age and child survival (ZV): Suggests that gestational age could be a factor in determining child survival rates.
+  
+The significance of these interactions is further evaluated by calculating by the p-values.
+
+### Significance of Interactions:
+
+The p-values for the interactions in the reduced model (m1) are as follows:
+
+```{r echo=FALSE, message=FALSE}
+# Print the p-values for the interactions in the reduced model
+p_values <- summary(m1)$coefficients[, 4][6:10]
+kable(p_values, caption = "P-values for Interactions in the Reduced Model", col.names = "P-value")
+```
+- The p-values for the interactions XY, XV, ZV are all less than 0.05, indicating that these interactions are statistically significant at the 5% significance level.
+- This indicates that the interactions between Mother's age and smoking habits, Mother's age and child survival, and Gestational age and child survival are significant associations.
+- The interactions XZ and YV have p-values greater than 0.05, suggesting that these interactions are statistically insignificant at the 5% significance level.
+- This indicates that the interactions between Mother's age and gestational age, and Smoking habits and child survival are not significant associations.
+
 
 ### Odds Ratios and Confidence Intervals:
 
@@ -280,9 +296,9 @@ To quantify the associations between variables, we calculated the odds ratios an
 
 Compute Odds Ratios from Coefficients:
 
-  - The odds ratio for each coefficient in a logistic regression model represents the multiplicative change in the odds of the outcome for a one-unit increase in the predictor variable, holding all other variables constant.
+  - The coefficients of interaction terms in a log-linear model directly correspond to the logarithm of conditional odds ratio when a baseline level is defined for the variables involved in the interaction, assuming all other variables in the model are held constant.
   
-  - Exponentiating the coefficient ($e^\beta$) converts the log-odds into odds ratios.
+  - Exponentiation of the coefficient ($e^\beta$) converts the log-odds into odds ratios, while keeping all other variables constant.
   
   - For each coefficient k, compute the confidence interval by exponentiating the bounds of the confidence interval for $\beta_k$.
 
@@ -298,7 +314,7 @@ kable(cbind(odds_ratios, conf_intervals_lower, conf_intervals_upper), caption = 
 
 ### Interpretation of Associations:
 
-The odds ratios and confidence intervals for each significant interaction term are as follows:
+The odds ratios and confidence intervals for each significant interaction term are as follows, while keeping all other variables constant:
 
   - Mother's age and smoking habits (XY): Older maternal age reduces the odds of smoking habits by 33.7%.
   
@@ -338,11 +354,22 @@ Fit a logistic regression model for the probability of child survival as a funct
 
   - Use the glm() function with the family argument set to binomial(link = "logit") to fit the logistic regression model.
   
+  - Fit the full model with all main effects and interactions, then remove insignificant interactions to simplify the model.
+  
 - Interpret the Results:
   
   - Examine the coefficients to determine the direction and strength of the relationships.
+  
+  - The coefficients of this logistic regression model represent the change in the log-odds of the response variable when the explanatory variables changes from 0 to 1, holding other variables constant.
+  
+  - The odds ratio for a explanatory variable $X_i$ with respect to the response variable is $e^{\beta_i}$ where $\beta_i$ is the coefficient of $X_i$ in the model.
+  
+  - Interpretation:
+    - If $\beta_i$ > 0: The odds of the outcome are higher when $X_i$ = 1 compared to $X_i$ = 0.
+    - If $\beta_i$ < 0: The odds of the outcome are lower when $X_i$ = 1 compared to $X_i$ = 0.
+    - If $\beta_i$ = 0: $X_i$ has no effect on the odds of the outcome.
 
-### Interpretation of Results:
+### Model Fitting and Interpretation:
 
 ```{r echo=FALSE, message=FALSE}
 # Expand the dataset into a binary response table
@@ -352,11 +379,20 @@ binary_data$n <- NULL  # Drop the frequency column, as it's no longer needed
 # Full logistic regression model
 logit_full <- glm(v ~ x + y + z + x:y + x:z + y:z, family = binomial(link = "logit"), data = binary_data)
 
+cat("Full Logistic Model Summary:\n")
+summary(logit_full)
+
 # Remove insignificant interactions one by one
 logit_step1 <- update(logit_full, . ~ . - x:y)
-logit_step2 <- update(logit_step1, . ~ . - x:z)
-logit_model <- update(logit_step2, . ~ . - y:z)
+cat("\nLogistic Model after removing x:y interaction:\n")
+summary(logit_step1)
 
+logit_step2 <- update(logit_step1, . ~ . - x:z)
+cat("\nLogistic Model after removing x:z interaction:\n")
+summary(logit_step2)
+
+logit_model <- update(logit_step2, . ~ . - y:z)
+cat("\nFinal Logistic Model after removing y:z interaction:\n")
 # Final reduced model
 summary(logit_model)
 
@@ -378,11 +414,13 @@ kable(logit_results, caption = "Logistic Regression Results: Odds Ratios, Confid
 
 ```
 
+- We have chosen the final logistic regression model after removing the insignificant interactions based on the p-values and lowest AIC.
+
 -**Model Summary:**
 
   - Null deviance: 1435.5 
   
-  - Residual Deviance: 1083.6
+  - Residual Deviance: 1084.8
     
     - a significant reduction in deviance from the null model, indicating a good fit.
     
@@ -393,27 +431,33 @@ kable(logit_results, caption = "Logistic Regression Results: Odds Ratios, Confid
   
     - Odds ratio: 0.63
     
-    - For each unit increase in maternal age, the odds of child survival decrease by 37%. (1-0.63).
+    - The odds of child survival decrease by 37%. (1-0.63) when maternal age is more than 30 years.
     
-    - P-value: 0.009, indicating a statistically significant effect.
+    - P-value: 0.009, indicating a statistically significant effect at the 5% significance level.
   
   - Gestational age (Z):
   
     - Odds ratio: 27.38
     
-    - Higher gestational age increases the odds of child survival by 27 times.
+    - Longer gestational age significantly increases the odds of child survival by 27 times.
     
-    - P-value: < 0.00o1, indicating a highly significant effect.
+    - P-value: < 0.0001, indicating a highly significant effect at the 5% significance level.
     
+-**Non-Significant Predictors:**
+    
+  - Smoking habits (Y):
+  
+    - Odds ratio: 0.655
+    
+    - P-value: 0.107, indicating a non-significant effect at the 5% significance level.
+    
+    - The odds of child survival is suggested to decrease by 34.5% when smoking habits are more than 5 cigarettes per day, but cannot be concluded for sure, since the p-value suggests that the odds ratio could have occurred due to random chance.
+
 ### Conclusion:
 
 The logistic regression analysis provides valuable insight into the factors influencing child survival. The significant predictors in the model are Mother's age and Gestational age, which have a fairly strong impact on child survival odds.
 
-- Mother's age: Older mothers have lower odds of child survival, with a 45% decrease in odds for each year increase in maternal age.
-
-- Gestational age: Longer gestational age significantly increases the odds of child survival, with a 2474% increase in odds for each additional day of gestation.
-
-- Model fit: The model shows a significant reduction in deviance from the null model, indicating a good fit. The AIC value of 1097.6 suggests that the model is relatively simple and provides a good balance between fit and complexity.
+- Model fit: The model shows a significant reduction in deviance from the null model, indicating a good fit. The AIC value of 1092.8 suggests that the model is relatively simple and provides a good balance between fit and complexity.
   
 While smoking habits were not statistically significant in this analysis, further research may be needed to explore the impact of smoking on child survival in more detail.
   
@@ -428,9 +472,8 @@ Illustrate the relationship between the logistic regression model from question 
 
   - Fit a log-linear model to analyze the relationship between the categorical variables Mother's age, Smoking habits, Gestational age, and Child survival to capture the relationships corresponding to the logistic regression model where Child survival is the response variable.
   
-  - Use the glm() function with the family argument set to poisson(link = "log") to fit the log-linear model with interaction variables as $x * y * v, x * z * v, y * z * v, x * y * z$.
-  
-# reduce the logistic one to remove interactions
+  - The log-linear model includes these additional terms to correspond to the logistic regression model - $v \sim x + y + z$ : all the interactions between the explanatory variables and each of the interaction between the response variable and the explanatory variables : $x*y, y*z, x*z, x*y*z, x*v, y*v, z*v$.
+
   
 - **Relationship between Log-Linear and Logistic Regression Models:**
 
@@ -444,13 +487,12 @@ Illustrate the relationship between the logistic regression model from question 
   
   - We will extract the coefficients and standard errors from both models and compare them to verify the consistency of the results.
   
-### Comparison of Estimates and Standard Errors:
 
 ```{r echo=FALSE, message=FALSE}
 # Extract coefficients and standard errors from the log-linear model
-m_new <- glm(n ~ x * y * v + x * z * v + y * z * v + x * y * z, family = poisson(link = "log"), data = data3)
-log_linear_coefs <- coef(m_new)[c("x:v", "y:v", "v:z")]
-log_linear_se <- summary(m_new)$coefficients[, 2][c("x:v", "y:v", "v:z")]
+m_new <- glm(n ~ x + y + z + v + x*y + y*z + x*z + x*y*z + x*v + y*v + z*v, family = poisson(link = "log"), data = data3)
+log_linear_coefs <- coef(m_new)[c("x:v", "y:v", "z:v")]
+log_linear_se <- summary(m_new)$coefficients[, 2][c("x:v", "y:v", "z:v")]
 
 # Extract coefficients and standard errors from the logistic regression model
 # Fit a reduced logistic regression model
@@ -470,8 +512,8 @@ comparison_results <- data.frame(
 # create a data frame for differences
 difference_results <- data.frame(
   Variable = c("Mother's age", "Smoking habits", "Gestational age"),
-  Est_Difference = log_linear_coefs - logit_coefs,
-  SE_Difference = log_linear_se - logit_se
+  Est_Difference = format(abs(log_linear_coefs - logit_coefs), scientific = TRUE, digits = 6),
+  SE_Difference = format(abs(log_linear_se - logit_se), scientific = TRUE, digits = 6)
 )
 
 # Print the comparison results in a table
@@ -485,8 +527,8 @@ kable(difference_results, caption = "Differences in Estimates and Standard Error
 
 While the estimation process is similar, the interpretation of parameters differs:
 
-  - Logistic Regression: Coefficients represent changes in the log-odds of the child survival (binary outcome).
-  - Log-Linear Models: Coefficients represent changes in the log of expected counts.
+  - Logistic Regression: Coefficients represent changes in the log-odds of the child survival (binary outcome) with respect to the change in explanatory variables.
+  - Log-Linear Models: Here, coefficients are derived as logarithm of conditional odds of child survival given the values of the explanatory variables with a defined baseline level, while keeping other variables constant.
 
 ### Why Both Models Yield Consistent Estimates:
 
