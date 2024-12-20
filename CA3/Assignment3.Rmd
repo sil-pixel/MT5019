@@ -298,9 +298,9 @@ Compute Odds Ratios from Coefficients:
 
   - The coefficients of interaction terms in a log-linear model directly correspond to the logarithm of conditional odds ratio when a baseline level is defined for the variables involved in the interaction, assuming all other variables in the model are held constant.
   
-  - Exponentiation of the coefficient ($e^\beta$) converts the log-odds into odds ratios, while keeping all other variables constant.
+  - Exponentiation of the coefficient converts the log-odds into conditional odds ratios, while keeping all other variables constant.
   
-  - For each coefficient k, compute the confidence interval by exponentiating the bounds of the confidence interval for $\beta_k$.
+  - Compute the confidence interval of the conditional odds ratio by exponentiating the bounds of the confidence interval for the coefficient of the interaction term.
 
 
 ```{r echo=FALSE, message=FALSE}
@@ -309,12 +309,13 @@ odds_ratios <- exp(coef(m1)[6:10])
 conf_intervals_lower <- exp(confint(m1)[6:10, 1])
 conf_intervals_upper <- exp(confint(m1)[6:10, 2])
 #print the odds ratios and confidence intervals
-kable(cbind(odds_ratios, conf_intervals_lower, conf_intervals_upper), caption = "Odds Ratios and 95% Confidence Intervals", col.names = c("Odds Ratio", "Lower CI", "Upper CI"))
+kable(cbind(odds_ratios, conf_intervals_lower, conf_intervals_upper), caption = "Conditional Odds Ratios and 95% Confidence Intervals", col.names = c("Cond. Odds Ratio", "Lower CI", "Upper CI"))
 ```
 
 ### Interpretation of Associations:
 
-The odds ratios and confidence intervals for each significant interaction term are as follows, while keeping all other variables constant:
+The conditional odds ratios and confidence intervals for each significant interaction term are interpreted as follows, while keeping all other variables constant and a set baseline level 
+*(mother under 30 years old, smoked less than 5 cigarettes per day, gestational age under 260 days and child did not survive)* for the variables involved in the interaction:
 
   - Mother's age and smoking habits (XY): Older maternal age reduces the odds of smoking habits by 33.7%.
   
@@ -329,11 +330,11 @@ The odds ratios and confidence intervals for each significant interaction term a
 ### Conclusion:
 
 - Quantitative Associations: 
-  Odds ratios quantify the strength and direction of associations for maternal age, smoking habits, gestational age, and child survival.
+  The Conditional odds ratios quantify the strength and direction of associations for maternal age, smoking habits, gestational age, and child survival.
 - Significant Predictors: 
   Variables with confidence intervals that exclude 1 (x:y, x:v, z:v) are statistically significant predictors.
 - Practical Implications: 
-  Mother's age and gestational age have the strongest influence on child survival, as shown by their odds ratios.
+  Mother's age and gestational age have the strongest influence on child survival, as shown by their conditional odds ratios.
   
   
 ## Question 4:
@@ -360,13 +361,18 @@ Fit a logistic regression model for the probability of child survival as a funct
   
   - Examine the coefficients to determine the direction and strength of the relationships.
   
-  - The coefficients of this logistic regression model represent the change in the log-odds of the response variable when the explanatory variables changes from 0 to 1, holding other variables constant.
+  - The coefficients of this logistic regression model represent the change in the log-odds of the response variable ($Y$) when the explanatory variables changes from 0 to 1, holding other variables constant.
   
-  - The odds ratio for a explanatory variable $X_i$ with respect to the response variable is $e^{\beta_i}$ where $\beta_i$ is the coefficient of $X_i$ in the model.
+  - For a i-th explanatory variable $X_i$, the coefficient of $X_i$ in the model is
   
+  $\beta_i = \log\left(\frac{\text{Odds of } Y=1 \text{ when } X_i=1 \text{ and other variables held constant}}{\text{Odds of } Y=1 \text{ when } X_i=0 \text{ and other variables held constant}}\right)$ 
+  
+  - The conditional odds ratio for a response variable with respect to a i-th explanatory variable $X_i$ where other variables are constant is $e^{\beta_i}$.
+
+
   - Interpretation:
-    - If $\beta_i$ > 0: The odds of the outcome are higher when $X_i$ = 1 compared to $X_i$ = 0.
-    - If $\beta_i$ < 0: The odds of the outcome are lower when $X_i$ = 1 compared to $X_i$ = 0.
+    - If $\beta_i$ > 0: The odds of the outcome are higher when $X_i$ = 1 compared to $X_i$ = 0, holding other variables constant.
+    - If $\beta_i$ < 0: The odds of the outcome are lower when $X_i$ = 1 compared to $X_i$ = 0, holding other variables constant.
     - If $\beta_i$ = 0: $X_i$ has no effect on the odds of the outcome.
 
 ### Model Fitting and Interpretation:
@@ -403,14 +409,14 @@ conf_intervals <- exp(confint(logit_model))
 # Combine results into a table
 logit_results <- data.frame(
   Variable = names(odds_ratios),
-  Odds_Ratio = odds_ratios,
+  Cond_Odds_Ratio = odds_ratios,
   Lower_CI = conf_intervals[, 1],
   Upper_CI = conf_intervals[, 2],
   P_Value = summary(logit_model)$coefficients[, 4]
 )
 
 # Print results
-kable(logit_results, caption = "Logistic Regression Results: Odds Ratios, Confidence Intervals, and P-Values")
+kable(logit_results, caption = "Logistic Regression Results: Cond. Odds Ratios, Confidence Intervals, and P-Values")
 
 ```
 
@@ -429,17 +435,17 @@ kable(logit_results, caption = "Logistic Regression Results: Odds Ratios, Confid
     
   - Mother's age (X):
   
-    - Odds ratio: 0.63
+    - Conditional odds ratio: 0.63
     
-    - The odds of child survival decrease by 37%. (1-0.63) when maternal age is more than 30 years.
+    - The odds of child survival decrease by 37%. (1-0.63) when maternal age is more than 30 years, holding gestational age and smoking habits constant.
     
     - P-value: 0.009, indicating a statistically significant effect at the 5% significance level.
   
   - Gestational age (Z):
   
-    - Odds ratio: 27.38
+    - Conditional odds ratio: 27.38
     
-    - Longer gestational age significantly increases the odds of child survival by 27 times.
+    - Longer gestational age significantly increases the odds of child survival by 27 times, holding maternal age and smoking habits constant.
     
     - P-value: < 0.0001, indicating a highly significant effect at the 5% significance level.
     
@@ -447,11 +453,13 @@ kable(logit_results, caption = "Logistic Regression Results: Odds Ratios, Confid
     
   - Smoking habits (Y):
   
-    - Odds ratio: 0.655
+    - Conditional odds ratio: 0.655
     
     - P-value: 0.107, indicating a non-significant effect at the 5% significance level.
     
-    - The odds of child survival is suggested to decrease by 34.5% when smoking habits are more than 5 cigarettes per day, but cannot be concluded for sure, since the p-value suggests that the odds ratio could have occurred due to random chance.
+    - The odds of child survival is suggested to decrease by 34.5% when smoking habits are more than 5 cigarettes per day, holding natural age and gestational age constant.
+    
+    - Although, it cannot be concluded for sure, since the p-value suggests that the odds ratio could have occurred due to random chance.
 
 ### Conclusion:
 
@@ -527,19 +535,13 @@ kable(difference_results, caption = "Differences in Estimates and Standard Error
 
 While the estimation process is similar, the interpretation of parameters differs:
 
-  - Logistic Regression: Coefficients represent changes in the log-odds of the child survival (binary outcome) with respect to the change in explanatory variables.
-  - Log-Linear Models: Here, coefficients are derived as logarithm of conditional odds of child survival given the values of the explanatory variables with a defined baseline level, while keeping other variables constant.
-
-### Why Both Models Yield Consistent Estimates:
-
-  - Both models rely on MLE, which is consistent and asymptotically efficient under regularity conditions.
-  - The estimates and standard errors are derived using the Fisher information matrix, which is valid for both models.
-  - Shared statistical frameworks (GLMs) ensure similar estimation methodologies, leading to consistent results.
+  - Logistic Regression: Coefficients represent the log of the conditional odds ratio of the outcome (child survival) for a one-unit change in the explanatory variable, holding all other variables constant.
+  - Log-Linear Models: Coefficients represent the log of the conditional odds ratio for the interaction effects between variables, while other variables are held constant.  These coefficients are often interpreted relative to a defined baseline level set to zero in categorical variables.
   
 ### Justification:
 
   - Both the log-linear model and logistic regression model could be used to analyze the relationship between categorical variables and child survival.
-  - The comparison of estimates and standard errors between the two models confirms that they yield identical results, providing consistent and reliable estimates of the relationships between variables.   
+  - The comparison of estimates and standard errors between the two models confirms that they yield identical results, justifying the consistency of the models we've chosen in capturing the relationships between variables.
   
 **Strengths of Log-Linear Models:**
 
