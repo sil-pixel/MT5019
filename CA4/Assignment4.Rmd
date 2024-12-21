@@ -496,7 +496,7 @@ To classify the survival status of patients admitted to the ICU, a decision tree
 1. **Model Fitting**:
    - A decision tree model was fit using the ICU dataset.
    - The response variable (`v2`) indicates survival (0 = survived, 1 = not survived).
-   - Predictor variables include age, blood pressure, consciousness level, and other clinical factors.
+   - The algorithm was allowed to automatically determine the most suitable variables for splitting at each node based on the Gini Index or Information Gain criteria.
 
 2. **Parameters Adjusted**:
    - **Splitting criterion**: Both "information" and "gini" criteria were tested to evaluate their effects on splits.
@@ -567,9 +567,9 @@ par(mfrow = c(1, 1))
 
 - Trees with cp = 0.1 are the simplest, making them easy to interpret, but they do not refine predictions beyond the primary split.
 
-- Trees with cp = 0.01 add an extra split, offering more detailed classification without adding excessive complexity.
+- Trees with cp = 0.01 in the gini case, these trees added several splits beyond the primary split on Conciusness Level, providing more refined predictions.
 
-- Trees with cp = 0.001 are the most complex, with multiple splits that may lead to overfitting.
+- Trees with cp = 0.001 are the most complex tested trees , with multiple splits that may lead to overfitting.
 
 **Compare splitting Criteria**
 
@@ -591,11 +591,19 @@ par(mfrow = c(1, 1))
 Based on the uploading plots and logic: 
 
 - **Best tree:** Gini, cp=0.01.
-The tree with cp = 0.01 using Gini Index was selected because it offers a good trade-off between interpretation and predictive refinement. Consciousness Level remains the primary driver of survival predictions, while the additional split on Blood Pressure refines subgroups with varying survival probabilities. This tree is simple enough for clinical use while providing actionable insights.
+The tree with cp = 0.01 using Gini Index was selected because it offers a good trade-off between interpretation and predictive refinement among different complexities. However, both gini index and information criteria achieved the same tree with a cp od 0.01. Consciousness Level remains the primary driver of survival predictions, while the additional split on Blood Pressure refines subgroups with varying survival probabilities. This tree is simple enough for clinical use while providing actionable insights.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=5, fig.height=3, fig.align='center'}
 rpart.plot(tm2, main = "Gini, cp = 0.01", digits = 3)
 ```
+-**Interpretation:**
+
+- The tree starts with Consciousness Level < 1 as the primary split, indicating its importance in predicting survival.
+- The next split is Blood Pressure >= 88. 
+
+At the root node the proportion of patients who survive (class = 0) is 0.200 (20%), and the proportion who do not survive (class = 1) is 0.800 (80%). Moving to the right child node (Consciousness Level >= 1), the probability of not surviving (class = 1) is 0.876, meaning that the probability of surviving if the patient is not conscious is 13.3%.
+In the left child node, the probability of surviving (class = 0) is 0.146, this means that among conscious patients, 14.6% survive and 85.4% do not.
+Then among the conscious patients, if their blood pressure is greater than or equal to 88, the probability of surviving is 0.119 and the probability of not surviving is 0.881. This means that among conscious patients with blood pressure greater than or equal to 88, 11.9% survive and 88.1%. However if the blood pressure is less than 88, the probability of not surviving is 0.667 and the probability of surviving is 0.333. This means that among conscious patients with blood pressure less than 88, 33.3% survive and 66.7% do
 
 \newpage
 
