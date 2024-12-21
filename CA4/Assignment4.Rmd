@@ -202,7 +202,7 @@ Here are the results of the Hosmer-Lemeshow goodness-of-fit test:
 predicted_probs <- predict(m_step, type = "response")
 
 # Perform Hosmer-Lemeshow goodness-of-fit test
-hoslem_test <- ResourceSelection::hoslem.test(data_ca4$Survival, predicted_probs, g = 8)
+hoslem_test <- ResourceSelection::hoslem.test(data_ca4$Survival, predicted_probs, g = 10)
 
 # Display test results
 hoslem_test
@@ -210,12 +210,11 @@ hoslem_test
 
 **Interpretation:**
 
-  1. The p-value of 0.8998 tells us not reject the null hypothesis that the model fits the data well. 
+  1. The p-value of 0.8404 tells us to not reject the null hypothesis that the model fits the data well. 
   
 ### Conclusion:
 
-The Hosmer-Lemeshow test indicates that the model fits the data well. The observed event rates are consistent with the expected probabilities predicted by the model. This suggests that the model is a good fit for the data and can be used to make accurate predictions about survival probabilities.
-
+The Hosmer-Lemeshow test with 10 groups (df = 8) yielded a chi-squared statistic of 4.1809 and a p-value of 0.8404. Since the p-value is much greater than 0.05, we fail to reject the null hypothesis that the model fits the data well. This indicates that the predicted probabilities align closely with the observed survival outcomes, confirming the adequacy of the logistic regression model for this dataset.
 
 ## Question 3
 
