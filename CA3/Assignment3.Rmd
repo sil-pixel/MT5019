@@ -174,7 +174,7 @@ kable(model_results, caption = "Model Comparison Results", align = c("l", "c", "
 
 **2. Impact of Higher-Order Interactions:**
 
-  - Models including single or lower-order interactions (e.g., X,Y,Z,V) exhibit low p-values compared to the higher-order interactions (e.g., XYZ,XYV,YZV). 
+  - Models limited to single or lower-order interactions (e.g., X,Y,Z,V) exhibit low p-values compared to the models including the higher-order interactions (e.g., XYZ,XYV,YZV). 
   - The saturated model achieves perfect fit but at the cost of increased complexity, as reflected in its AIC.
   - Models with XYV, XZV as interactions have the highest p-values, indicating that removing some of the three-way interactions does not significantly reduce the model fit. These models are candidates for simpler yet statistically robust options.
   - The increasing trend of deviance and degrees of freedom (df) as the number of interactions decreases reflects the trade-off between model complexity and goodness-of-fit: simpler models fit the data less well but have more residual degrees of freedom.
@@ -236,11 +236,13 @@ The reduced model (m1) has a lower AIC value compared to the saturated model, in
 
 **P-value:**
 
+The null hypothesis in this case states that the reduced model (m1) is sufficient to explain the data.
+
 We reject the null hypothesis if the p-value is less than the significance level (0.05), indicating that the reduced model is not sufficient to explain the data.
 
 p-value = 0.9353
 
-The p-value of the reduced model is 0.9353. This indicates that the reduced model (m1) is a a very good fit. The reduced model captures the essential relationships between variables while maintaining simplicity and interpretability.
+The p-value of the reduced model is 0.9353, which is much greater than the significance level (0.05). This indicates that we fail to reject the null hypothesis. Thus, the reduced model (m1) is a very good fit for the data, capturing the essential relationships between variables while maintaining simplicity and interpretability.
 
 ## Question3:
 
@@ -314,8 +316,7 @@ kable(cbind(odds_ratios, conf_intervals_lower, conf_intervals_upper), caption = 
 
 ### Interpretation of Associations:
 
-The conditional odds ratios and confidence intervals for each significant interaction term are interpreted as follows, while keeping all other variables constant and a set baseline level 
-*(mother under 30 years old, smoked less than 5 cigarettes per day, gestational age under 260 days and child did not survive)* for the variables involved in the interaction:
+The conditional odds ratios and confidence intervals for each significant interaction term are interpreted as follows, while keeping all other variables constant and assuming a baseline level of zero ($\lambda_{00} = \lambda_{01} = \lambda_{10} = 0$)  for the interaction terms. This corresponds to the reference category of (*mother under 30 years old, smoked less than 5 cigarettes per day, gestational age under 260 days, and child did not survive*) for the variables involved in the interaction:
 
   - Mother's age and smoking habits (XY): Older maternal age reduces the odds of smoking habits by 33.7%.
   
@@ -330,7 +331,7 @@ The conditional odds ratios and confidence intervals for each significant intera
 ### Conclusion:
 
 - Quantitative Associations: 
-  The Conditional odds ratios quantify the strength and direction of associations for maternal age, smoking habits, gestational age, and child survival.
+  The Conditional odds ratios quantify the strength and direction of associations for maternal age, smoking habits, gestational age, and child survival. The association can be conversely interpreted by the reciprocal of the odds ratio for the inverse relationship between variables.
 - Significant Predictors: 
   Variables with confidence intervals that exclude 1 (x:y, x:v, z:v) are statistically significant predictors.
 - Practical Implications: 
