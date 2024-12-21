@@ -316,7 +316,7 @@ kable(cbind(odds_ratios, conf_intervals_lower, conf_intervals_upper), caption = 
 
 ### Interpretation of Associations:
 
-The conditional odds ratios and confidence intervals for each significant interaction term are interpreted as follows, while keeping all other variables constant and assuming a baseline level of zero ($\lambda_{00} = \lambda_{01} = \lambda_{10} = 0$)  for the interaction terms. This corresponds to the reference category of (*mother under 30 years old, smoked less than 5 cigarettes per day, gestational age under 260 days, and child did not survive*) for the variables involved in the interaction:
+The conditional odds ratios and confidence intervals for each significant interaction term are interpreted as follows, while keeping all other variables constant and assuming a baseline level of zero ($\lambda_{00} = \lambda_{01} = \lambda_{10} = 0$)  for the interaction terms. This baseline corresponds to the reference category (*mother under 30 years old, smoked less than 5 cigarettes per day, gestational age under 260 days, and child did not survive*) for the respective variables:
 
   - Mother's age and smoking habits (XY): Older maternal age reduces the odds of smoking habits by 33.7%.
   
