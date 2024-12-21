@@ -30,30 +30,31 @@ Report the model selection process briefly. Based on your chosen model, which fa
 
   - Load the dataset and rename variables for clarity.
   
-  - Combine categories for categorical variables if necessary.
-  
-- Model Fitting:
+  - Combine categories for categorical variables if necessary:
+    - For "Ethnicity," combined "Black" and "Other" into a single category to address low cell counts. 
+    - Rationale: To ensure sufficient representation in each category for statistical analysis.
 
+- **Model Fitting**:
   - Fit an empty logistic regression model and a full logistic regression model to be used in the stepwise selection.
-  - Here, Logistic Regression Model is used to predict the binary outcome of probability of not surviving based on multiple predictors.
-  
-- Model Selection Process:
+  - Use stepwise selection in a both-directional manner to identify a parsimonious model using AIC as the selection criterion. 
 
-  - Use a stepwise selection with AIC to identify a parsimonious model.
-  
--	Analysis of the Final Model:
+- **Patient ID Variable**:
+  - "Patient" variable (ID) was excluded as it does not have a meaningful interpretation. 
 
-    - Extract coefficients, odds ratios, and their 95% confidence intervals for significant variables.
+- **Analysis of the Final Model**:
+  - Extract coefficients, odds ratios, and their 95% confidence intervals for significant variables.
+  - Significant variables were identified as those with p-values less than 0.05.
 
-- Interpretation:
+- **Interpretation**:
+  - Interpret the results from the AIC, odds ratios, and confidence intervals to determine the most impactful predictors.
 
-  - Interpret the results from the AIC, odds ratios, and confidence intervals, to determine the best model.
 
 ### Results:
 
 Summary of the final model after performing stepwise selection using AIC:
 
 ```{r echo=FALSE}
+# Load dataset
 data_ca4 <- read.csv("data_ca4.csv")
 
 # Rename variables for clarity
@@ -66,17 +67,20 @@ colnames(data_ca4) <- c(
   "BloodCreatine", "ConsciousnessLevel"
 )
 
-# Combine categories for Ethnicity (example)
-data_ca4$Ethnicity[data_ca4$Ethnicity > 1] <- 0
+# Combine categories for Ethnicity
+data_ca4$Ethnicity[data_ca4$Ethnicity > 1] <- 0  # Combine "Black" and "Other" [Comment 1.2]
 
-# Fit models
-m_empty <- glm(Survival ~ 1, family = binomial, data = data_ca4)   # Empty model
-m_full <- glm(Survival ~ ., family = binomial, data = data_ca4)    # Full model
+# Exclude "Patient" variable as it is not meaningful [Comment 2.3]
+data_ca4 <- data_ca4 %>% select(-Patient)
 
-# Stepwise model selection using AIC
+# Fit empty and full logistic regression models
+m_empty <- glm(Survival ~ 1, family = binomial, data = data_ca4)  # Empty model
+m_full <- glm(Survival ~ ., family = binomial, data = data_ca4)   # Full model
+
+# Stepwise model selection using AIC in both directions [Comment 2.1]
 m_step <- step(m_empty, scope = list(lower = m_empty, upper = m_full), direction = "both", trace = FALSE)
 
-# Summary of the final model
+# Extract summary of the final model
 summary(m_step)
 
 ```
@@ -84,7 +88,7 @@ summary(m_step)
 
 **Model selection:**
 
-- The final logistic regression model includes the following variables: ConsciousnessLevel, TypeOfAdmission, Age, Cancer, Patient, BloodCarbonDioxide, BloodPH, and BloodPressure.
+- The final logistic regression model includes the following variables: ConsciousnessLevel, TypeOfAdmission, Age, Cancer, BloodCarbonDioxide, BloodPH, and BloodPressure.
 
 - These variables were selected using a stepwise AIC, which ensures a balance between model complexity and goodness of fit.
 
@@ -104,8 +108,7 @@ summary(m_step)
   
   - BloodPH
 
-- Patient variable was exlcluded from the final model as the ID code was not significant. 
-- BloodPressure was also excluded from the final model as it was not significant according to the p-value.
+-The variable BloodPressure was not statistically significant (p = 0.103152) and is retained in the model for completeness.
 
 ### Odds Ratios and Confidence Intervals:
 
@@ -113,68 +116,59 @@ Here's the final report after extracting odds ratios and confidence intervals fo
 
 ```{r echo=FALSE}
 
-# Extract Odds Ratios and Confidence Intervals
+# Extract Odds Ratios and Confidence Intervals for significant variables
 odds_ratios <- exp(coef(m_step))  # Odds Ratios
 conf_intervals <- exp(confint(m_step))  # 95% Confidence Intervals
-
-# Combine results into a data frame for clarity
-results <- data.frame(
-  Variable = names(odds_ratios),
-  OddsRatio = odds_ratios,
-  `CI Lower` = conf_intervals[, 1],
-  `CI Upper` = conf_intervals[, 2]
-)
 
 # Filter significant variables (p-value < 0.05)
 significant_vars <- summary(m_step)$coefficients
 significant_vars <- significant_vars[significant_vars[, 4] < 0.05, ]
 
-# Final table for reporting
-final_results <- results %>%
-  filter(Variable %in% rownames(significant_vars))
+# Combine results into a table
+results <- data.frame(
+  Variable = names(odds_ratios),
+  OddsRatio = odds_ratios,
+  `CI Lower` = conf_intervals[, 1],
+  `CI Upper` = conf_intervals[, 2]
+) %>%
+  filter(Variable %in% rownames(significant_vars)) %>% 
+  filter(Variable != "(Intercept)")  # Exclude the intercept explicitly
 
-final_results
+# Display results
+kable(results, caption = "Odds Ratios and Confidence Intervals for Significant Variables")
 ```
 
-1. ConsciousnessLevel: 
+1.	ConsciousnessLevel:
 
-   - Odds Ratio: 13.75 (CI: 4.31-65.28)
-   
-   - Patients who are unconscious or in a coma have a significantly higher probability of not surviving compared to those who are conscious.
-   
-2. TypeOfAdmission:
+	-	Odds Ratio: 10.42 (CI: 3.64–43.47)
+	-	 Patients who are unconscious or in a coma are over 10 times more likely to not survive compared to those who are conscious.
+	
+2.	TypeOfAdmission:
 
-   - Odds Ratio: 21.25 (CI: 4.36-189.15)
-   
-   - Acute admissions are associated with a significantly higher probability of not surviving compared to non-acute admissions.
-   
-3. Age:
+	-	Odds Ratio: 15.69 (CI: 3.84–133.69)
+	-	 Acute admissions are associated with approximately 16 times higher odds of not surviving compared to non-acute admissions.
 
-   - Odds Ratio: 1.04 (CI: 1.01-1.07)
-   
-   - For each additional year of age, the odds of not surviving increase by 4%.
+3.	Age:
+	
+	-	Odds Ratio: 1.04 (CI: 1.01–1.07)
+	-	 For every additional year of age, the odds of not surviving increase by 4%.
 
-4. Cancer:
-
-   - Odds Ratio: 10.37 (CI: 1.95-66.54)
-   
-   - Patients with cancer have over 10 times higher odds of not surviving compared to those without cancer.
-   
-5. BloodCarbonDioxide:
-
-   - Odds Ratio: 0.085 (CI: 0.008-0.55)
-   
-   - Lower blood carbon dioxide levels significantly reduce the odds of not surviving.
-  
-6. BloodPH:
-
-   - Odds Ratio: 8.07 (CI: 1.4-53.60)
-   
-   - Lower blood pH levels significantly increase the odds of not surviving.
+4.	Cancer:
+	
+	-	Odds Ratio: 8.71 (CI: 1.66–53.52)
+	-	 Patients with cancer are over 8 times more likely to not survive compared to those without cancer.
+	
+5.	BloodCarbonDioxide:
+	-	Odds Ratio: 0.10 (CI: 0.01–0.63)
+	-	 Higher levels of blood carbon dioxide significantly reduce the odds of not surviving.
+	
+6.	BloodPH:
+	-	Odds Ratio: 6.11 (CI: 1.10–37.71)
+	-	 Patients with higher blood pH levels have an increased risk of not surviving
 
 ### Conclusion:
 
-The selected model indicates that factors such as consciousness level, type of admission, age, cancer, blood carbon dioxide, and blood pH are significant predictors of survival. Patients who are unconscious, have acute admissions, are older, have cancer, and have abnormal blood gas levels are at higher risk of not surviving. These results can help identify high-risk patients and improve treatment strategies to increase survival rates.
+The model indicates that factors such as consciousness level, type of admission, age, cancer, blood carbon dioxide, and blood pH are significant predictors of survival. Patients who are unconscious, have acute admissions, are older, have cancer, have lower levels of blood carbon dioxide, and have higher levels of blood pH are at a higher risk of not surviving. This analysis helps identify high-risk patients and can guide clinical interventions to improve survival rates by targeting these critical factors.
 
 
 ## Question 2
@@ -383,9 +377,9 @@ library(pROC)
 full_model_roc <- roc(data_ca4$Survival, predicted_probs)
 plot(full_model_roc, col = "blue", main = "ROC Curves", legacy.axes = TRUE)
 
-formula_full_model <- "Survival ~ ConsciousnessLevel + TypeOfAdmission + Age + Cancer + Patient + BloodCarbonDioxide + BloodPH + BloodPressure"
-formula_model_a <- "Survival ~ ConsciousnessLevel + TypeOfAdmission + Age + Cancer + BloodCarbonDioxide + BloodPH + Patient"
-formula_model_b <- "Survival ~ TypeOfAdmission + Age + Cancer + BloodCarbonDioxide + BloodPH + Patient + BloodPressure"
+formula_full_model <- "Survival ~ ConsciousnessLevel + TypeOfAdmission + Age + Cancer+ BloodCarbonDioxide + BloodPH + BloodPressure"
+formula_model_a <- "Survival ~ ConsciousnessLevel + TypeOfAdmission + Age + Cancer + BloodCarbonDioxide + BloodPH"
+formula_model_b <- "Survival ~ TypeOfAdmission + Age + Cancer + BloodCarbonDioxide + BloodPH + BloodPressure"
 
 # Additional models
 # Model 1: Remove non-significant variable BloodPressure
