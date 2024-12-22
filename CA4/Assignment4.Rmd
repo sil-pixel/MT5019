@@ -26,27 +26,40 @@ Report the model selection process briefly. Based on your chosen model, which fa
 
 ### Approach:
 
-- Data Preparation:
+- **Data Preparation**:
 
-  - Load the dataset and rename variables for clarity.
-  
-  - Combine categories for categorical variables if necessary:
-    - For "Ethnicity," combined "Black" and "Other" into a single category to address low cell counts. 
-    - Rationale: To ensure sufficient representation in each category for statistical analysis.
+	1.	Load the dataset and rename variables for clarity.
+	
+	2.	Simplify categorical variables for improved analysis: Categories for Ethnicity and ConsciousnessLevel were combined to reduce their three-level factors into binary factors, enhancing interpretability, analytical efficiency, and addressing low cell counts in specific categories.
+	
+    	*Ethnicity:*
+    	  - Category 1 = White was retained as is.
+    	  - Categories 2 = Black and 3 = Other were merged into a single category labeled as 0.
+	    
+    	*ConsciousnessLevel:*
+	      - Category 0 = Awake remained unchanged.
+    	  - Categories 1 = Unconscious and 2 = Coma were combined into a single category labeled as 1.
+	  
+	3.	Remove unnecessary variables: Variables that do not contribute meaningfully to the analysis or prediction, such as PatientID (which lacks clinical significance), were excluded to streamline the dataset and focus on relevant factors.
+ 
+
+ Rationale: To ensure sufficient representation in each category for statistical analysis.
 
 - **Model Fitting**:
-  - Fit an empty logistic regression model and a full logistic regression model to be used in the stepwise selection.
-  - Use stepwise selection in a both-directional manner to identify a parsimonious model using AIC as the selection criterion. 
 
-- **Patient ID Variable**:
-  - "Patient" variable (ID) was excluded as it does not have a meaningful interpretation. 
+  1. Fit an empty logistic regression model and a full logistic regression model to be used in the stepwise selection.
+  
+  2. Use stepwise selection in a both-directional manner to identify a parsimonious model using AIC as the selection criterion. 
 
 - **Analysis of the Final Model**:
-  - Extract coefficients, odds ratios, and their 95% confidence intervals for significant variables.
-  - Significant variables were identified as those with p-values less than 0.05.
+
+  1. Extract coefficients, odds ratios, and their 95% confidence intervals for significant variables.
+  
+  2. Significant variables were identified as those with p-values less than 0.05.
 
 - **Interpretation**:
-  - Interpret the results from the AIC, odds ratios, and confidence intervals to determine the most impactful predictors.
+
+  1. Interpret the results from the AIC, odds ratios, and confidence intervals to determine the most impactful predictors.
 
 
 ### Results:
@@ -69,6 +82,9 @@ colnames(data_ca4) <- c(
 
 # Combine categories for Ethnicity
 data_ca4$Ethnicity[data_ca4$Ethnicity > 1] <- 0  # Combine "Black" and "Other" [Comment 1.2]
+
+# Combine categories for ConsciousnessLevel (example)
+data_ca4$ConsciousnessLevel[data_ca4$ConsciousnessLevel > 1] <- 1
 
 # Exclude "Patient" variable as it is not meaningful [Comment 2.3]
 data_ca4 <- data_ca4 %>% select(-Patient)
