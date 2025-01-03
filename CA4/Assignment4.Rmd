@@ -30,13 +30,15 @@ Report the model selection process briefly. Based on your chosen model, which fa
 
 	1.	Load the dataset and rename variables for clarity.
 	
-	2.	Simplify categorical variables for improved analysis: Categories for Ethnicity and ConsciousnessLevel were combined to reduce their three-level factors into binary factors, enhancing interpretability, analytical efficiency, and addressing low cell counts in specific categories.
+	2.	Simplify categorical variables for improved analysis: Categories for Ethnicity and ConsciousnessLevel were combined to reduce their three-level factors into binary factors, enhancing interpretability and resolving the issue of their cell counts being low. 
 	
     	*Ethnicity:*
+    	  - The existing categories: White, Black and Other were re-categorized to ensure sufficient representation, with White and Others grouped together due to the majority cell count being White.
     	  - Category 1 = White was retained as is.
     	  - Categories 2 = Black and 3 = Other were merged into a single category labeled as 0.
 	    
     	*ConsciousnessLevel:*
+    	- The existing categories: Awake, Unconscious, and Coma were re-categorized to ensure sufficient representation, with Awake and Others grouped together due to the majority cell count being Awake.
 	      - Category 0 = Awake remained unchanged.
     	  - Categories 1 = Unconscious and 2 = Coma were combined into a single category labeled as 1.
 	  
@@ -49,7 +51,7 @@ Report the model selection process briefly. Based on your chosen model, which fa
 
   1. Fit an empty logistic regression model and a full logistic regression model to be used in the stepwise selection.
   
-  2. Use stepwise selection in a both-directional manner to identify a parsimonious model using AIC as the selection criterion. 
+  2. We chose AIC with a bidirectional stepwise method for variable selection due to its balance between model fit and complexity, which is suitable for predictive modeling. AIC prioritizes minimizing prediction error over identifying the true model, making it ideal for datasets with a moderate sample size (200 records) and a relatively large number of predictors (20 variables). Bidirectional selection combines forward and backward approaches, ensuring a comprehensive search for significant variables while avoiding overfitting. The stepwise selection process helps identify the most relevant predictors of survival.
 
 - **Analysis of the Final Model**:
 
@@ -120,11 +122,12 @@ summary(m_step)
   
   - Cancer
   
-  - BloodCarbonDioxide, 
+  - BloodPressure
+  
+  - BloodCarbonDioxide
   
   - BloodPH
 
--The variable BloodPressure was not statistically significant (p = 0.103152) and is retained in the model for completeness.
 
 ### Odds Ratios and Confidence Intervals:
 
@@ -156,35 +159,49 @@ kable(results, caption = "Odds Ratios and Confidence Intervals for Significant V
 
 1.	ConsciousnessLevel:
 
-	-	Odds Ratio: 10.42 (CI: 3.64–43.47)
-	-	 Patients who are unconscious or in a coma are over 10 times more likely to not survive compared to those who are conscious.
+	-	 Odds Ratio: 89.68 (CI: 15.42–894.72)
+	-  ConsciousnessLevel: 1 = Unconscious or Coma, 0 = Awake
+	-	 Patients who are unconscious or in a coma are over 89.68 times more likely to not survive compared to those who are conscious. This indicates that ConsciousnessLevel is a critical predictor of survival.
 	
 2.	TypeOfAdmission:
 
-	-	Odds Ratio: 15.69 (CI: 3.84–133.69)
-	-	 Acute admissions are associated with approximately 16 times higher odds of not surviving compared to non-acute admissions.
+	-	 Odds Ratio: 20.65 (CI: 4.03–186.17)
+	-  TypeOfAdmission: 1 = Acute, 0 = Non-acute
+	-	 Acute admissions are associated with approximately 20.65 times higher odds of not surviving compared to non-acute admissions. This suggests that the type of admission significantly impacts survival outcomes.
 
 3.	Age:
 	
-	-	Odds Ratio: 1.04 (CI: 1.01–1.07)
-	-	 For every additional year of age, the odds of not surviving increase by 4%.
+	-	 Odds Ratio: 1.04 (CI: 1.01–1.07)
+	-	 For every additional year of age, the odds of not surviving increase by 4%. This suggests that older patients are at a higher risk of not surviving.
 
 4.	Cancer:
 	
-	-	Odds Ratio: 8.71 (CI: 1.66–53.52)
-	-	 Patients with cancer are over 8 times more likely to not survive compared to those without cancer.
+	-	 Odds Ratio: 11.05 (CI: 1.99–73.2)
+	-	 Cancer: 1 = Yes, 0 = No
+	-	 Patients with Cancer have 11.05 times higher odds of not surviving compared to those without Cancer. This highlights the significant impact of Cancer on survival outcomes.
 	
-5.	BloodCarbonDioxide:
-	-	Odds Ratio: 0.10 (CI: 0.01–0.63)
-	-	 Higher levels of blood carbon dioxide significantly reduce the odds of not surviving.
+5.	BloodPressure:
+
+	-	 Odds Ratio: 0.986 (CI: 0.97–0.998)
+	-	 For each mm Hg increase in blood pressure, the odds of not surviving decrease by 1.4%. This indicates that higher blood pressure, within the normal range, reflecting a healthier cardiovascular system, is associated with better survival outcomes.
+		
+6.	BloodCarbonDioxide:
+
+	-	 Odds Ratio: 0.105 (CI: 0.01–0.64)
+	-  BloodCarbonDioxide Levels: 1 = above 45, 0 = below 45
+	-	 Patients with blood carbon dioxide levels above 45 have a 89.5% lower odds of not surviving compared to those with below 45. This suggests that maintaining normal blood carbon dioxide levels is crucial for survival.
 	
-6.	BloodPH:
-	-	Odds Ratio: 6.11 (CI: 1.10–37.71)
-	-	 Patients with higher blood pH levels have an increased risk of not surviving
+7.	BloodPH:
+
+	-	 Odds Ratio: 6.38 (CI: 1.14–38.48)
+	-  BloodPH Levels: 1 = below 7.25, 0 = above 7.25
+	-	 Patients with blood pH levels below 7.25 have 6.38 times higher odds of not surviving compared to those with above 7.25. This indicates that abnormal blood pH levels are associated with a higher risk of not surviving.
 
 ### Conclusion:
 
-The model indicates that factors such as consciousness level, type of admission, age, cancer, blood carbon dioxide, and blood pH are significant predictors of survival. Patients who are unconscious, have acute admissions, are older, have cancer, have lower levels of blood carbon dioxide, and have higher levels of blood pH are at a higher risk of not surviving. This analysis helps identify high-risk patients and can guide clinical interventions to improve survival rates by targeting these critical factors.
+The model indicates that factors such as consciousness level, type of admission, age, cancer, blood carbon dioxide, blood pressure and blood pH are significant predictors of survival. Patients who are unconscious, have acute admissions, are older, have cancer, exhibit very low blood pressure, higher levels of blood carbon dioxide, and lower levels of blood pH are at a higher risk of not surviving. This analysis helps identify high-risk patients and can guide clinical interventions to improve survival rates by addressing these critical factors.
+
+Based on the prior knowledge of p-values from the model summary, **ConsciousnessLevel** appears to be the **most significant predictor** of survival, with an odds ratio of 89.68, indicating a strong impact on the odds of survival. Conversely, **BloodPressure** is the **least significant** predictor, with an odds ratio of 0.986, suggesting that higher blood pressure reduces the odds of non-survival by only 1.4%. This interpretation will be further validated in the following questions by testing the significance of these predictors through ROC curve analysis and LOOCV.
 
 
 ## Question 2
@@ -226,11 +243,11 @@ hoslem_test
 
 **Interpretation:**
 
-  1. The p-value of 0.8404 tells us to not reject the null hypothesis that the model fits the data well. 
+  1. The p-value of 0.5131 tells us to not reject the null hypothesis that the model fits the data well at a 5% significance level.
   
 ### Conclusion:
 
-The Hosmer-Lemeshow test with 10 groups (df = 8) yielded a chi-squared statistic of 4.1809 and a p-value of 0.8404. Since the p-value is much greater than 0.05, we fail to reject the null hypothesis that the model fits the data well. This indicates that the predicted probabilities align closely with the observed survival outcomes, confirming the adequacy of the logistic regression model for this dataset.
+The Hosmer-Lemeshow test with 10 groups (df = 8) yielded a chi-squared statistic of 7.2202 and a p-value of 0.5131. Since the p-value is much greater than 0.05, we fail to reject the null hypothesis that the model fits the data well. This indicates that the predicted probabilities align closely with the observed survival outcomes, confirming the adequacy of the logistic regression model for this dataset.
 
 ## Question 3
 
@@ -320,23 +337,23 @@ create_perf_metrics(0.7, conf_matrix_0.7)
 
 **Accuracy:** The model has an accuracy of 0.835, meaning that it correctly predicted 83.5% of the cases.
 
-**Sensitivity:** The sensitivity of 0.625 indicates that the model correctly identified 62.5% of the actual non-survivors.
+**Sensitivity:** The sensitivity of 0.65 indicates that the model correctly identified 65% of the actual non-survivors.
 
-**Specificity:** The specificity of 0.8875 suggests that the model correctly identified 88.75% of the actual survivors.
+**Specificity:** The specificity of 0.88125 suggests that the model correctly identified 88.125% of the actual survivors.
 
 **Threshold = 0.5:**
 
-**Accuracy:** The model has an accuracy of 0.865, meaning that it correctly predicted 86.5% of the cases.
+**Accuracy:** The model has an accuracy of 0.87, meaning that it correctly predicted 87% of the cases.
 
-**Sensitivity:** The sensitivity of 0.45 indicates that the model correctly identified 45% of the actual non-survivors.
+**Sensitivity:** The sensitivity of 0.425 indicates that the model correctly identified 42.5% of the actual non-survivors.
 
-**Specificity:** The specificity of 0.96875 suggests that the model correctly identified 96.9% of the actual survivors.
+**Specificity:** The specificity of 0.98125 suggests that the model correctly identified 98.1% of the actual survivors.
 
 **Threshold = 0.7:**
 
-**Accuracy:** The model has an accuracy of 0.84, meaning that it correctly predicted 84% of the cases.
+**Accuracy:** The model has an accuracy of 0.86, meaning that it correctly predicted 86% of the cases.
 
-**Sensitivity:** The sensitivity of 0.25 indicates that the model correctly identified 25% of the actual non-survivors.
+**Sensitivity:** The sensitivity of 0.35 indicates that the model correctly identified 35% of the actual non-survivors.
 
 **Specificity:** The specificity of 0.9875 suggests that the model correctly identified 98.75% of the actual survivors.
 
@@ -366,13 +383,13 @@ Create plots of ROC curves for the chosen model. Calculate the AUC for the full 
   
 - Implementation:
 
-  - Compare the AUC values for the full model and two additional models  and the model with the highest AUC is considered the best model for predicting survival probabilities.
+  - Compare the AUC values for the full model and two additional models and the model with the highest AUC is considered the best model for (in-sample) predicting survival probabilities.
 
-  - The two additional models used for comparison with the full model are derived by removing a significant variable and a non-significant variable from the full model (such as ConsciousnessLevel and Blood Pressure as mentioned in Q1).
+  - The two additional models used for comparison are derived by removing the highest significant variable (ConsciousnessLevel) and the least significant variable (Blood Pressure) from the full model that includes all the significant predictors available in the dataset as mentioned in Q1.
   
   - Thereby, we can compare the significance of these variables in predicting survival probabilities by observing the change in AUC values using ROC curves.
   
-      - Full Model: 
+      - Full Model with only significant predictors from the dataset: 
       
       $Survival \sim ConsciousnessLevel + TypeOfAdmission + Age + Cancer + BloodCarbonDioxide + BloodPH + Patient + BloodPressure$
   
@@ -386,7 +403,7 @@ Create plots of ROC curves for the chosen model. Calculate the AUC for the full 
   
 ### Results:
 
-```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=8, fig.height=6, fig.align='center'}
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=7, fig.height=5, fig.align='center'}
 # Load the pROC package
 library(pROC)
 full_model_roc <- roc(data_ca4$Survival, predicted_probs)
@@ -422,10 +439,9 @@ knitr::kable(data.frame(
 
 ### Model Selection:
 
-- The full model has the highest AUC of 0.873, indicating that it has a better predictive performance for survival probabilities compared to the other models.
-- Model A, which excludes Blood Pressure, has an AUC of 0.871 is quite close to the full model, whereas Model B, which excludes ConsciousnessLevel, has an AUC of 0.804, which has a bigger difference with full model compared to the Model B.
-- This can be interpreted as Blood Pressure does not significantly contribute to the patient survival prediction, as its exclusion does not significantly affect the AUC of the model.
-- Whereas ConsciousnessLevel is a significant predictor of survival, and its exclusion has a more significant impact on the model's predictive performance.
+- The full model has the highest AUC of 0.8678, indicating that it has a better predictive performance for survival probabilities compared to the other models.
+- Model A, which excludes Blood Pressure, has an AUC of 0.854 is quite close to the full model, whereas Model B, which excludes ConsciousnessLevel, has an AUC of 0.792, which has a bigger difference with full model compared to the Model A. 
+- This confirms our assumption that Blood Pressure does not significantly contribute to the patient survival prediction, as its exclusion does not significantly affect the AUC of the model, whereas ConsciousnessLevel is a significant predictor of survival, and its exclusion has a more significant impact on the model's predictive performance.
 - The AUC of all three models are much higher than 0.5 (random guessing) and can be considered effective for predicting survival probabilities, with the full model being the best among them.
 
 ## Question 5
@@ -482,17 +498,15 @@ knitr::kable(data.frame(
 
 ### Interpretation:
 
-- According the LOOCV-adjusted AUC values, Model A has the highest AUC of 0.824, followed by the Full Model with an AUC of 0.819, and Model B with an AUC of 0.756.
+- According the LOOCV-adjusted AUC values, Full Model has the highest AUC of 0.82, followed by the Model A with an AUC of 0.815, and Model B with an AUC of 0.75.
 
-- LOOCV-adjusted AUC is a more reliable AUC as it is calculated by leaving out one observation at a time and predicted using the model trained on the remaining data.
+- LOOCV-adjusted AUC is a more reliable AUC as it is calculated by leaving out one observation at a time and predicted using the model trained on the remaining data. The decrease in the AUC values compared to the AUC values from the previous analysis is expected as LOOCV provides a more realistic estimate of the model's performance on unseen data and helps to avoid overfitting.
 
-- Model A having a higher AUC than full model indicates that the full model was overfitted in the previous analysis, and Model A is the best model for predicting survival probabilities.
+- Hence, we can conclude that the Full Model has the best predictive performance among the three models based on the LOOCV-adjusted AUC values.
 
-- This means that Blood Pressure is not required to be added as a explanatory variable while predicting the survival probabilities of the patients and removing it from the model improves the predictive performance.
+- Model A can be considered as the second-best model, as it has a slightly lower AUC compared to the Full Model. This means that even though Blood Pressure may not be a highly significant variable, it is still needed to improve the predictive performance of the model.
 
-- The AUC of Model B has further decreased compared to the previous analysis, suggesting that the previous Model B was also overfitted and that there is a bigger impact of the ConsciousnessLevel of the patient in predicting their survival than previously thought.
-
-- This signifies that ConsciousnessLevel of the patient is very essential to predict the survival probability.
+- The AUC of Model B has further decreased compared to the previous analysis, suggesting that there is a bigger impact of the ConsciousnessLevel of the patient in predicting their survival than previously thought. This signifies that ConsciousnessLevel of the patient is very essential to predict the survival probability.
 
 ---
 
@@ -522,16 +536,11 @@ To classify the survival status of patients admitted to the ICU, a decision tree
    - Tree diagrams were created using the `rpart.plot` package to assess the structure and interpretability of the models.
 
 4. **Tree Selection**:
-   - The selecion criteria for the best tree includes:
+   - The selection criteria for a good decision tree includes:
    
      - **Interpretability**: The tree should be easy to interpret and explain. Trees with fewer splits are preferred.
      - **Relevance of Splits**: Identify important predictors of survival.
      - **Clinical Relevance**: For ICU patients, identifying key factors affecting survival is crucial.
-
-5. **Variables of Interest**:
-   - **`v21` (Consciousness level)**: The primary variable splitting the data in both trees, indicating its importance for predicting survival.
-   - **`v11` (Blood pressure)**: A secondary variable used in the second tree, capturing further distinctions in survival likelihood.
-
 
 ### Results:
 
@@ -577,23 +586,23 @@ par(mfrow = c(1, 1))
 
 ### Interpretation and selection:
 
-**Simplicity and Predictors**
-
-- All trees highlight Consciousness Level as the primary predictor of survival.
-
-- Trees with cp = 0.1 are the simplest, making them easy to interpret, but they do not refine predictions beyond the primary split.
-
-- Trees with cp = 0.01 in the gini case, these trees added several splits beyond the primary split on Conciusness Level, providing more refined predictions.
-
-- Trees with cp = 0.001 are the most complex tested trees , with multiple splits that may lead to overfitting.
-
-**Compare splitting Criteria**
+**Splitting Criteria:**
 
 - **Gini index** tends to favor splits with balanced distributions of the target classes, which may better handle uncertainty in clinical settings.
 
 - **Information gain** focuses on maximizing the reduction in entropy, which could lead to splits that are sightly more biased but more efficient for some datasets.
 
-**Simplicity vs refinement**
+**Simplicity and Predictors:**
+
+- All trees highlight Consciousness Level as the primary predictor of survival.
+
+- Trees with cp = 0.1 are the simplest, making them easy to interpret, but they do not refine predictions beyond the primary split.
+
+- Trees with cp = 0.01 added a split on Blood Pressure, providing additional insights into survival probabilities. The trees are identical for both Gini and Information criteria. This suggests that the model is not overfitting and the relationships in the data are consistent.
+
+- Trees with cp = 0.001 are the most complex tested trees, with multiple splits that may lead to overfitting. The additional splits vary for Gini and Information criteria, indicating that the choice of splitting method affects the tree structure. While Gini chose Age and HeartRate for further splits, Information chose TypeOfAdmission and Age. 
+
+**Simplicity vs refinement:**
 
 - a tree with cp = 0.01 is a good compromise, as it adds refinement without sacrificing interpretation, and without risking overfitting.
 
@@ -601,27 +610,35 @@ par(mfrow = c(1, 1))
 
   - If the data has imbalanced classes, gini might be better.
   - If entropy reduction is preferred, Information could perform better.
-  
+
+Since the trees with cp = 0.01 are the most balanced in terms of simplicity and refinement, the tree with Gini Index and cp = 0.01 is selected as a good decision tree for predicting survival probabilities in the ICU dataset as it offers a good trade-off between interpretation and predictive performance and is identical to the tree with Information Gain and cp = 0.01, indicating robustness in the model selection. This tree is simple enough for clinical use while providing actionable insights.
+   
 ### Conclusion:
 
-Based on the uploading plots and logic: 
-
-- **Best tree:** Gini, cp=0.01.
-The tree with cp = 0.01 using Gini Index was selected because it offers a good trade-off between interpretation and predictive refinement among different complexities. However, both gini index and information criteria achieved the same tree with a cp od 0.01. Consciousness Level remains the primary driver of survival predictions, while the additional split on Blood Pressure refines subgroups with varying survival probabilities. This tree is simple enough for clinical use while providing actionable insights.
+**Good Decision tree:** Gini, cp=0.01.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=5, fig.height=3, fig.align='center'}
 rpart.plot(tm2, main = "Gini, cp = 0.01", digits = 3)
 ```
--**Interpretation:**
 
-- The tree starts with Consciousness Level < 1 as the primary split, indicating its importance in predicting survival.
-- The next split is Blood Pressure >= 88. 
+**Variables of Interest:**
 
-At the root node the proportion of patients who survive (class = 0) is 0.200 (20%), and the proportion who do not survive (class = 1) is 0.800 (80%). Moving to the right child node (Consciousness Level >= 1), the probability of not surviving (class = 1) is 0.876, meaning that the probability of surviving if the patient is not conscious is 13.3%.
-In the left child node, the probability of surviving (class = 0) is 0.146, this means that among conscious patients, 14.6% survive and 85.4% do not.
-Then among the conscious patients, if their blood pressure is greater than or equal to 88, the probability of surviving is 0.119 and the probability of not surviving is 0.881. This means that among conscious patients with blood pressure greater than or equal to 88, 11.9% survive and 88.1%. However if the blood pressure is less than 88, the probability of not surviving is 0.667 and the probability of surviving is 0.333. This means that among conscious patients with blood pressure less than 88, 33.3% survive and 66.7% do
+   - **Consciousness level**: The primary variable splitting the data in both trees, indicating its importance for predicting survival.
+   - **Blood pressure**: A secondary variable used in the second tree, capturing further distinctions in survival likelihood.
 
-\newpage
+**Interpretation:**
+
+At the root node, the proportion of patients who do not survive (class = 1) is 0.800 (80%), while the proportion who survive (class = 0) is 0.200 (20%).
+
+  - **Right Child Node (Consciousness Level > 0):**
+Among patients who are not conscious (Consciousness Level > 0), the probability of not surviving (class = 1) is 0.867 (86.7%), and the probability of surviving (class = 0) is 0.133 (13.3%).
+  - **Left Child Node (Consciousness Level = 0):**
+Among conscious patients (Consciousness Level = 0), the probability of surviving (class = 0) is 0.146 (14.6%), and the probability of not surviving (class = 1) is 0.854 (85.4%).
+  - **Blood Pressure >= 88:**
+Among conscious patients with blood pressure greater than or equal to 88, the probability of surviving (class = 0) is 0.119 (11.9%), and the probability of not surviving (class = 1) is 0.881 (88.1%).
+  - **Blood Pressure < 88:**
+Among conscious patients with blood pressure less than 88, the probability of surviving (class = 0) is 0.333 (33.3%), and the probability of not surviving (class = 1) is 0.667 (66.7%).
+
 
 ## Question 2
 
@@ -668,9 +685,9 @@ kable(auc_comparison) %>%
   row_spec(2, color = "black", background = "white")
 ```
 
-1. **Decision Tree AUC**: The decision tree model with Gini Index and cp = 0.01 has an AUC of 0.8118, indicating a good predictive performance.
+1. **Decision Tree AUC**: The decision tree model with Gini Index and cp = 0.01 has an AUC of 0.724, indicating a good predictive performance.
 
-2. **Logistic Regression AUC**: The logistic regression model has an AUC of 0.8729, which is higher than the decision tree model.
+2. **Logistic Regression AUC**: The logistic regression model has an AUC of 0.8678, which is higher than the decision tree model.
 
 ### Interpretation:
 
@@ -691,7 +708,7 @@ Calculate a LOOCV-corrected AUC for the decision tree model and comment on the r
 - **LOOCV for Decision Tree**:
 
   Perform Leave One Out Cross Validation (LOOCV) for the decision tree model to calculate the LOOCV-adjusted AUC.
-- We have chosen the above mentioned best decision tree model with Gini Index and cp = 0.01 for this analysis.
+- We have chosen the above mentioned decision tree model with Gini Index and cp = 0.01 for this analysis.
 
 ### Results:
 
@@ -715,6 +732,12 @@ roc(data_ca4$Survival, predprob_tm_LOOCV)
 
 ### Interpretation:
 
-- The LOOCV-adjusted AUC is 0.6284 which is a significant decrease from the unadjusted AUC of 0.8115. This indicates that the decision tree model may be overfitting the data, leading to a lower predictive performance on unseen data. 
-- The decision tree model may benefit from additional tuning or simplification to enhance its predictive performance and avoid overfitting.
-- This could be due to the presence of the parameters BloodPressure and Patient ID in the model, which may not be significant predictors of survival and could be contributing to overfitting.
+- The LOOCV-adjusted AUC is 0.5595 which is a significant decrease from the unadjusted AUC of 0.724. This indicates that the decision tree model may not generalize well to new data and could be overfitting the training data. 
+
+- The decrease in AUC suggests that the decision tree model may not be as effective in predicting survival probabilities on unseen data as initially thought. This highlights the importance of assessing model performance using cross-validation techniques to avoid overfitting and ensure robust predictions.
+
+- The LOOCV-adjusted AUC is just above 0.5, indicating that the model's predictive performance is only slightly better than random guessing. This suggests that the decision tree model may not be suitable for predicting survival probabilities in this dataset and may require further refinement or a different modeling approach. This can be linked to overfitting, as the model may have learned the noise in the training data rather than the underlying patterns. Further refinements may be necessary to improve predictive performance.
+
+- The decision tree with Gini Index and cp = 0.001 or Information Gain and cp = 0.001 could be explored instead to improve predictive performance and generalization to new data.
+
+---
