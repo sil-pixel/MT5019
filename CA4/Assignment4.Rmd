@@ -533,12 +533,12 @@ To classify the survival status of patients admitted to the ICU, a decision tree
    - **Complexity parameter (`cp`)**: Different values were used to control the depth of the tree and prevent overfitting.
 
 3. **Visualization**:
-   - Tree diagrams were created using the `rpart.plot` package to assess the structure and interpretability of the models.
+   - Tree diagrams were created using the `rpart.plot` package to assess the structure and interpretation of the models.
 
 4. **Tree Selection**:
    - The selection criteria for a good decision tree includes:
    
-     - **Interpretability**: The tree should be easy to interpret and explain. Trees with fewer splits are preferred.
+     - **Interpretation**: The tree should be easy to interpret and explain. Trees with fewer splits are preferred.
      - **Relevance of Splits**: Identify important predictors of survival.
      - **Clinical Relevance**: For ICU patients, identifying key factors affecting survival is crucial.
 
@@ -630,9 +630,9 @@ rpart.plot(tm2, main = "Gini, cp = 0.01", digits = 3)
 
 At the root node, the proportion of patients who do not survive (class = 1) is 0.800 (80%), while the proportion who survive (class = 0) is 0.200 (20%).
 
-  - **Right Child Node (Consciousness Level > 0):**
+  - **Consciousness Level > 0:**
 Among patients who are not conscious (Consciousness Level > 0), the probability of not surviving (class = 1) is 0.867 (86.7%), and the probability of surviving (class = 0) is 0.133 (13.3%).
-  - **Left Child Node (Consciousness Level = 0):**
+  - **Consciousness Level = 0:**
 Among conscious patients (Consciousness Level = 0), the probability of surviving (class = 0) is 0.146 (14.6%), and the probability of not surviving (class = 1) is 0.854 (85.4%).
   - **Blood Pressure >= 88:**
 Among conscious patients with blood pressure greater than or equal to 88, the probability of surviving (class = 0) is 0.119 (11.9%), and the probability of not surviving (class = 1) is 0.881 (88.1%).
